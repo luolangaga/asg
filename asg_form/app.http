@@ -1,0 +1,4 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+@hostname=localhost
+@port=7065
+GET https://{{hostname}}:{{port}}/api/v1/Duplicate_name
