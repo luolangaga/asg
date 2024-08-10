@@ -64,7 +64,10 @@ namespace asg_form.Controllers.Store
             using (TestDbContext sb = new TestDbContext())
             {
                 var a= await sb.T_Store.FindAsync(storeinfo.id);
-                a = storeinfo;
+                a.Name=storeinfo.Name;
+                a.description=storeinfo.description;
+                a.information=storeinfo.information;
+                a.Price=storeinfo.Price;
                 await sb.SaveChangesAsync();
                 return Ok(storeinfo);
             }
@@ -88,7 +91,26 @@ namespace asg_form.Controllers.Store
           
             using (TestDbContext sb = new TestDbContext())
             {
-                var a= sb.T_Store.ToList().GroupBy(a => a.Type);
+                var a= sb.T_Store.ToList();
+               return Ok(a);
+            }
+        }
+
+        [Route("api/v1/Store/Verification")]
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<object>> Verification(long storeinfoid)
+        {
+
+            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
+            {
+                return BadRequest(new error_mb { code = 400, message = "无权访问" });
+            }
+            using (TestDbContext sb = new TestDbContext())
+            {
+                var a = sb.T_Storeinfo.Find(storeinfoid);
+                a.isVerification = true;
+                await sb.SaveChangesAsync();
                 return Ok(a);
             }
         }
@@ -112,7 +134,7 @@ namespace asg_form.Controllers.Store
             }
             using (TestDbContext sb = new TestDbContext())
             {
-                var a = new Store_record(null,null);
+                var a = new all_record();
                 IQueryable<StoreinfoDB> b;
                 if (showVerification)
                 {
@@ -124,19 +146,30 @@ namespace asg_form.Controllers.Store
                 }
                if (search_id == null)
                 {
-                  return Ok(await b.Paginate(pageindex, pagesize).ToListAsync())  ;
+                    a.cout = b.Count();
+                    a.msg = await b.Paginate(pageindex, pagesize).ToListAsync();
+                 
                 }
                 else
                 {
-                    return Ok(await b.Where(a=>a.buyerid==search_id).Paginate(pageindex, pagesize).ToListAsync());
+                    a.cout = b.Where(a => a.buyerid == search_id).Count();
+                    a.msg = await b.Where(a => a.buyerid == search_id).Paginate(pageindex, pagesize).ToListAsync();
                 }
+                return Ok(a);
             }
         }
-        public record Store_record(long? allstort,List<StoreinfoDB>? Storeinfos);
+        public record buyreq_record(bool iserror, string msg);
+
+
+        public record all_record()
+        {
+            public long? cout { get; set; } 
+        public   object msg { get; set; }
+        }
         [Route("api/v1/Store/Buy")]
-        [HttpGet]
+        [HttpPost]
         [Authorize]
-        public async Task<ActionResult<object>> BuyStore(long storeid)
+        public async Task<ActionResult<object>> BuyStore([FromBody]long[] storeid)
         {
             string id = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var user = await userManager.FindByIdAsync(id);
@@ -149,20 +182,28 @@ namespace asg_form.Controllers.Store
 
             using (TestDbContext sb = new TestDbContext())
             {
-                var stort= await sb.T_Store.FindAsync(storeid);
-                try
+                List<buyreq_record> bureq = new List<buyreq_record>();
+                foreach (var item in storeid)
                 {
-                    user.Integral = cut_value((long)user.Integral,stort.Price);
-                    await userManager.UpdateAsync(user);
-                    await sb.T_Storeinfo.AddAsync(new StoreinfoDB { buyerid = id.ToInt64(), Store = stort });
-                    await sb.SaveChangesAsync();
-                    return Ok("购买成功，请前往背包查看");
-                }
-                catch
-                {
-                    return BadRequest(new error_mb { code = 400, message = $"你的金钱无法满足你完成以下操作" });
+                    var stort = await sb.T_Store.FindAsync(storeid);
+                    try
+                    {
+                        user.Integral = cut_value((long)user.Integral, stort.Price);
+                        await userManager.UpdateAsync(user);
+                        await sb.T_Storeinfo.AddAsync(new StoreinfoDB { buyerid = id.ToInt64(), Store = stort });
+                        await sb.SaveChangesAsync();
+                        bureq.Add(new buyreq_record(false, $"购买{stort.Name}成功"));
+                       
+                    }
+                    catch
+                    {
+                        bureq.Add(new buyreq_record(true, $"购买失败，因为余额不足"));
 
+
+                    }
                 }
+
+             return Ok(bureq);
             }
         }
     }
