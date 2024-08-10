@@ -19,6 +19,8 @@ using NPOI.OpenXmlFormats.Spreadsheet;
 using Mirai.Net.Data.Shared;
 using MimeKit;
 using MailKit.Net.Smtp;
+using Mirai.Net.Utils.Scaffolds;
+using Mirai.Net.Sessions.Http.Managers;
 
 namespace asg_form.Controllers
 {
@@ -29,7 +31,7 @@ namespace asg_form.Controllers
         private readonly UserManager<User> userManager;
         private readonly IHubContext<room> hubContext;
         public admin(
-            RoleManager<Role> roleManager, UserManager<User> userManager,IHubContext<room> hubContext)
+            RoleManager<Role> roleManager, UserManager<User> userManager, IHubContext<room> hubContext)
         {
 
             this.roleManager = roleManager;
@@ -41,7 +43,7 @@ namespace asg_form.Controllers
         [Authorize]
         public async Task<ActionResult<int>> getalladmin_c()
         {
-           int a=await userManager.Users.CountAsync();
+            int a = await userManager.Users.CountAsync();
             return Ok(a);
         }
         [Route("api/v1/admin/allteam_c")]
@@ -49,13 +51,13 @@ namespace asg_form.Controllers
         [Authorize]
         public async Task<ActionResult<int>> getteam_c()
         {
-             TestDbContext testDb=new TestDbContext();
-              int a = testDb.Forms.Count();
+            TestDbContext testDb = new TestDbContext();
+            int a = testDb.Forms.Count();
             if (a >= 100)
             {
 
             }
-              return Ok(a);
+            return Ok(a);
         }
 
         [Route("api/v1/admin/statistics")]
@@ -66,61 +68,35 @@ namespace asg_form.Controllers
         {
             TestDbContext testDb = new TestDbContext();
             int form_t = testDb.Forms.Count();
-            int user_t=userManager.Users.Count();
-            int sh_t=testDb.team_Games.Count();
-            int team_log_t=testDb.schlogs.Count();
+            int user_t = userManager.Users.Count();
+            int sh_t = testDb.team_Games.Count();
+            int team_log_t = testDb.schlogs.Count();
             int role_t = testDb.Roles.Count();
-            return new { form_t = form_t,user_t=user_t,sh_t=sh_t,sh_log_t=team_log_t,role_t=role_t };
+            return new { form_t = form_t, user_t = user_t, sh_t = sh_t, sh_log_t = team_log_t, role_t = role_t };
         }
 
         [Route("api/v1/admin/updata_img")]
         [HttpPost]
         public async Task<ActionResult<object>> update_img(IFormFile imageFile)
         {
-            if (imageFile == null || imageFile.Length == 0) 
-                return BadRequest("Invalid image file."); 
+            if (imageFile == null || imageFile.Length == 0)
+                return BadRequest("Invalid image file.");
             // 将文件保存到磁盘
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "loge/", $"friend-{imageFile.FileName}"); 
-            using (var stream = new FileStream(filePath, FileMode.Create))   
-            {    
-                await imageFile.CopyToAsync(stream);   
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "loge/", $"friend-{imageFile.FileName}");
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
             }    // 返回成功响应
-           return Ok("Image file uploaded successfully.");
+            return Ok("Image file uploaded successfully.");
 
-        }
-
-        [Route("api/v1/admin/qianyi")]
-        [HttpPost]
-        public async Task<ActionResult<object>> qianyi()
-        {
-            using (TestDbContext db = new TestDbContext())
-            {
-                await db.Database.MigrateAsync();  
-                db.RemoveRange(delform);
-                await db.SaveChangesAsync();
-            }
-            return Ok();
-        }
-        [Route("api/v1/admin/deljunk")]
-        [HttpPost]
-        public async Task<ActionResult<object>> deljunk()
-        {
-          using(TestDbContext db=new TestDbContext())
-            {
-                db.Database.SetCommandTimeout(2000);
-                var delform = db.Forms.Include(a => a.role).Where(a => a.team_name.Length >= 25);
-                db.RemoveRange(delform);
-                await db.SaveChangesAsync();
-            }
-            return Ok();
         }
 
 
         [Route("api/v1/admin/Privacy_Policy")]
         [HttpPost]
         [Authorize]
- 
-        public async Task<ActionResult<object>> Privacy_Policy([FromBody]string rule_markdown)
+
+        public async Task<ActionResult<object>> Privacy_Policy([FromBody] string rule_markdown)
         {
 
             if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
@@ -133,6 +109,42 @@ namespace asg_form.Controllers
             return Ok("添加成功！");
 
         }
+
+
+        [Route("api/v1/admin/post_qqbotmsg")]
+        [HttpPost]
+        [Authorize]
+
+        public async Task<ActionResult<object>> post_qqbotmsg([FromBody] string msg,string qqgrope,bool is_atall)
+        {
+
+            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
+            {
+                return BadRequest(new error_mb { code = 400, message = "无权访问" });
+            }
+if(is_atall){
+                var messageChain = new MessageChainBuilder()
+                                 .AtAll()
+                                .Plain(msg)
+                                .Build();
+                await MessageManager.SendGroupMessageAsync(qqgrope, messageChain);
+
+            }
+else{
+                var messageChain = new MessageChainBuilder()
+                                          .Plain(msg)
+                                          .Build();
+                await MessageManager.SendGroupMessageAsync(qqgrope, messageChain);
+
+            }
+
+
+            return Ok("成功！");
+
+        }
+
+
+
 
 
         [Route("api/v1/admin/allschedle_c")]
@@ -154,7 +166,7 @@ namespace asg_form.Controllers
         [Route("api/v1/admin/allperson")]
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<List<post_user>>> getalladmin( short page,short page_long=10)
+        public async Task<ActionResult<List<post_user>>> getalladmin(short page, short page_long = 10)
         {
 
 
@@ -174,12 +186,12 @@ namespace asg_form.Controllers
                 {
                     bool isadmin = await userManager.IsInRoleAsync(auser, "admin");
                     var roles = await userManager.GetRolesAsync(auser);
- user.Add(new post_user { id = auser.Id, chinaname = auser.chinaname, name = auser.UserName, isadmin = isadmin, email = auser.Email ,Roles= (List<string>)roles ,officium=auser.officium});
+                    user.Add(new post_user { id = auser.Id, chinaname = auser.chinaname, name = auser.UserName, isadmin = isadmin, email = auser.Email, Roles = (List<string>)roles, officium = auser.officium });
 
                 }
                 return user;
 
-              
+
             }
             else
             {
@@ -188,6 +200,95 @@ namespace asg_form.Controllers
             }
 
 
+
+
+        }
+
+
+     
+
+
+
+
+
+        /// <summary>
+        /// 获取所有用户-支持分页(整合api:allperson_c)
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="page_long"></param>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        [Route("api/v2/admin/allperson")]
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<post_user_v2>> getalladmin_v2(string? keyword, short page, short page_long = 10)
+        {
+            if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
+            {
+                List<User> users = new List<User>();
+                post_user_v2 user = new post_user_v2();
+                if (keyword == null)
+                {
+                    int a = userManager.Users.Count();
+                    user.Count = a;
+                    int b = page_long * page;
+                    if (page_long * page > a)
+                    {
+                        b = a;
+                    }
+                    users = userManager.Users.Skip(page_long * page - page_long).Take(page_long).ToList();
+
+                }
+                else
+                {
+                    int a = userManager.Users.Where(a => a.UserName.IndexOf(keyword) >= 0 || a.chinaname.IndexOf(keyword) >= 0 || a.Email.IndexOf(keyword) >= 0).Count();
+                    user.Count = a;
+                    int b = page_long * page;
+                    if (page_long * page > a)
+                    {
+                        b = a;
+                    }
+                    users = userManager.Users.Where(a => a.UserName.IndexOf(keyword) >= 0 || a.chinaname.IndexOf(keyword) >= 0 || a.Email.IndexOf(keyword) >= 0).Skip(page_long * page - page_long).Take(page_long).ToList();
+
+                }
+
+
+                foreach (var auser in users)
+                {
+                    bool isadmin = await userManager.IsInRoleAsync(auser, "admin");
+                    var roles = await userManager.GetRolesAsync(auser);
+                    try
+                    {
+                       // user.user.Add(new post_user { id = auser.Id, chinaname = auser.chinaname, name = auser.UserName, isadmin = isadmin, email = auser.Email, Roles = (List<string>)roles, officium = auser.officium, Integral = auser.Integral });
+
+                    }
+                    catch
+                    {
+
+                    }
+
+                }
+                return user;
+
+
+            }
+            else
+            {
+                return BadRequest(new error_mb { code = 400, message = "无权访问" });
+
+            }
+
+
+
+
+        }
+
+        public class post_user_v2
+        {
+
+
+            public int Count { get; set; }
+            public List<post_user> user { get; set; } = new List<post_user>();
 
 
         }
@@ -207,7 +308,8 @@ namespace asg_form.Controllers
                 var ouser = await userManager.FindByIdAsync(userid);
 
                 await userManager.AddToRoleAsync(ouser, "admin");
-              return "成功！";
+
+                return Ok(new { message = "用户成功设置为管理员" });
             }
             else
             {
@@ -216,23 +318,23 @@ namespace asg_form.Controllers
             }
 
         }
-       
+
 
         //管理员设置用户的职位
         [Route("api/v1/admin/setop")]
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<string>> setrole(string userid,string opname)
+        public async Task<ActionResult<string>> setrole(string userid, string opname)
         {
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
                 var ouser = await userManager.FindByIdAsync(userid);
 
-              ouser.officium = opname;
+                ouser.officium = opname;
                 await userManager.UpdateAsync(ouser);
 
-        
-               return "成功！";
+
+                return "成功！";
             }
             else
             {
@@ -273,7 +375,7 @@ namespace asg_form.Controllers
             }
             return true;
 
-            
+
         }
 
 
@@ -355,7 +457,7 @@ namespace asg_form.Controllers
 
                 await userManager.DeleteAsync(setuser);
                 logger.Warn($"管理员删除了用户{setuser.UserName}！");
-               return "成功！";
+                return "成功！";
             }
             else
             {
@@ -376,15 +478,15 @@ namespace asg_form.Controllers
         [Route("api/v1/admin/officium")]
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<string>> setofficium(string userid,string officium)
+        public async Task<ActionResult<string>> setofficium(string userid, string officium)
         {
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
                 var ouser = await userManager.FindByIdAsync(userid);
 
                 ouser.officium = officium;
-               await userManager.UpdateAsync(ouser);
-                  logger.Warn($"设置了{ouser.UserName}的职位为{officium}");
+                await userManager.UpdateAsync(ouser);
+                logger.Warn($"设置了{ouser.UserName}的职位为{officium}");
                 SendEmail(ouser.Email, "ASG赛事组", $@"<div>
     <includetail>
         <table style=""font-family: Segoe UI, SegoeUIWF, Arial, sans-serif; font-size: 12px; color: #333333; border-spacing: 0px; border-collapse: collapse; padding: 0px; width: 580px; direction: ltr"">
@@ -463,14 +565,14 @@ namespace asg_form.Controllers
         /// <returns></returns>
         [Route("api/v1/admin/team/")]
         [HttpPost]
-        public async Task<ActionResult<string>> team([FromBody]int[] formid,string game_tag )
+        public async Task<ActionResult<string>> team([FromBody] int[] formid, string game_tag)
         {
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
-            { 
-            TestDbContext ctx = new TestDbContext();
-               
-                var form =  ctx.Forms.Include(a=>a.events).OrderBy(a => Guid.NewGuid()).Where(a=>formid.Any(b=>b==a.Id)).ToList();
-           
+            {
+                TestDbContext ctx = new TestDbContext();
+
+                var form = ctx.Forms.Include(a => a.events).OrderBy(a => Guid.NewGuid()).Where(a => formid.Any(b => b == a.Id)).ToList();
+
                 string teamname1 = "";
                 string teamname2 = "";
                 for (int i = 0; i < form.Count; i++)
@@ -478,14 +580,14 @@ namespace asg_form.Controllers
                     if (i % 2 == 0)
                     {
                         teamname1 = form[i].team_name;
-                        
+
                     }
                     else
                     {
-                       teamname2 = form[i].team_name;
+                        teamname2 = form[i].team_name;
                         ctx.team_Games.Add(new team_game
                         {
-                            team1_name =teamname1,
+                            team1_name = teamname1,
                             team2_name = teamname2,
                             opentime = DateTime.Now,
                             team1_piaoshu = 0,
@@ -493,16 +595,16 @@ namespace asg_form.Controllers
                             commentary = "待公布",
                             referee = "待公布",
                             belong = form[1].events.name,
-                            tag=game_tag
+                            tag = game_tag
                         });
-                       // await Task.Delay(6000);
+                        // await Task.Delay(6000);
                     }
                 }
-                
-               await ctx.SaveChangesAsync();
+
+                await ctx.SaveChangesAsync();
                 logger.Info($"管理员已经随机分组");
                 return "OK";
-            
+
             }
             return BadRequest(new error_mb { code = 400, message = "无权访问" });
 
@@ -511,30 +613,43 @@ namespace asg_form.Controllers
 
         [Route("api/v1/admin/SendEmail/")]
         [HttpPost]
-        public async Task<ActionResult<string>> Sendemail(string To,string Title,string msg)
-        { 
-        SendEmail(To,Title, msg);
+        public async Task<ActionResult<string>> Sendemail(string To, string Title, string msg)
+        {
+            SendEmail(To, Title, msg);
             return Ok();
         }
 
-            /// <summary>
-            /// 删除表单
-            /// </summary>
-            /// <param name="formid">表单id</param>
-            /// <param name="password">表单密码</param>
-            /// <returns></returns>
-            [Route("api/v1/admin/form/")]
+        /// <summary>
+        /// 删除表单
+        /// </summary>
+        /// <param name="formid">表单id</param>
+        /// <param name="password">表单密码</param>
+        /// <returns></returns>
+        [Route("api/v1/admin/form/")]
         [HttpDelete]
-        public async Task<ActionResult<string>> delform(string formname)
+        public async Task<ActionResult<string>> delform(int formid)
         {
 
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
                 TestDbContext ctx = new TestDbContext();
-                var form = await ctx.Forms.Include(a=>a.role).FirstOrDefaultAsync(a => a.team_name == formname);
+                var form = await ctx.Forms.Include(a => a.role).FirstOrDefaultAsync(a => a.Id == formid);
+                var users = await userManager.Users.Include(a => a.haveform).Where(a => a.haveform == form).ToListAsync();
+                try
+                {
+                    foreach (var user in users)
+                    {
+                        user.haveform = null;
+                        await userManager.UpdateAsync(user);
+                    }
+                }
+                catch
+                {
+                }
+
                 ctx.Forms.Remove(form); ;
                 await ctx.SaveChangesAsync();
-                logger.Warn($"管理员删除了表单{formname},参赛选手：{string.Join(',',form.role.Select(a=>a.role_name))}");
+                logger.Warn($"管理员删除了表单{formid},参赛选手：{string.Join(',', form.role.Select(a => a.role_name))}");
                 return Ok("删除成功！");
             }
             else
@@ -560,10 +675,10 @@ namespace asg_form.Controllers
         {
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
-               using(TestDbContext  ctx = new TestDbContext())
+                using (TestDbContext ctx = new TestDbContext())
                 {
                     ctx.T_Friends.Add(friend);
-                   await ctx.SaveChangesAsync() ;
+                    await ctx.SaveChangesAsync();
                 }
 
 
@@ -581,19 +696,19 @@ namespace asg_form.Controllers
         [Route("api/v1/admin/Friend")]
         [HttpPut]
         [Authorize]
-        public async Task<ActionResult<string>> Put_Friend(T_Friend friend,int friend_id)
+        public async Task<ActionResult<string>> Put_Friend(T_Friend friend, int friend_id)
         {
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
                 using (TestDbContext ctx = new TestDbContext())
                 {
-                   var friend_p= ctx.T_Friends.First(a=>a.id==friend_id);
+                    var friend_p = ctx.T_Friends.First(a => a.id == friend_id);
                     friend_p.comMsg = friend.comMsg;
                     friend_p.comTime = friend.comTime;
                     friend_p.account = friend.account;
                     friend_p.orgName = friend.orgName;
                     friend_p.headName = friend.headName;
-                    friend_p.degree=friend.degree;
+                    friend_p.degree = friend.degree;
                     friend_p.comType = friend.comType;
                     friend_p.headTel = friend.headTel;
                     await ctx.SaveChangesAsync();
@@ -620,7 +735,7 @@ namespace asg_form.Controllers
             {
                 using (TestDbContext ctx = new TestDbContext())
                 {
-                    var friend= await ctx.T_Friends.FirstAsync(a => a.id == friend_id);
+                    var friend = await ctx.T_Friends.FirstAsync(a => a.id == friend_id);
                     ctx.Remove(friend);
                     await ctx.SaveChangesAsync();
                 }
@@ -640,25 +755,25 @@ namespace asg_form.Controllers
         [HttpGet]
         public async Task<ActionResult<string>> Get_Friend(short page, short page_long)
         {
-           
-               
-                using (TestDbContext ctx = new TestDbContext())
+
+
+            using (TestDbContext ctx = new TestDbContext())
+            {
+                int Total = ctx.T_Friends.Count();
+                int b = page_long * page;
+                if (page_long * page > Total)
                 {
-                    int Total = ctx.T_Friends.Count();
-                    int b = page_long * page;
-                    if (page_long * page > Total)
-                    {
-                        b = Total;
-                    }
-             
-                    var friend = await ctx.T_Friends.OrderByDescending(a=>a.degree).Skip(page_long * page - page_long).Take(page_long).ToListAsync() ;
-                    object body = new { friend, Total };
-                    return Ok(body);
+                    b = Total;
                 }
 
+                var friend = await ctx.T_Friends.OrderByDescending(a => a.degree).Skip(page_long * page - page_long).Take(page_long).ToListAsync();
+                object body = new { friend, Total };
+                return Ok(body);
+            }
 
-               
-         
+
+
+
 
         }
 
