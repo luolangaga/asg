@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Mirai.Net.Sessions;
@@ -20,6 +21,7 @@ using System.Text;
 
 Console.WriteLine("\n   _____    _________ ________ \n  /  _  \\  /   _____//  _____/ \n /  /_\\  \\ \\_____  \\/   \\  ___ \n/    |    \\/        \\    \\_\\  \\\n\\____|__  /_______  /\\______  /\n        \\/        \\/        \\/ \n__________                __    ___________           .___\n\\______   \\_____    ____ |  | __\\_   _____/ ____    __| _/\n |    |  _/\\__  \\ _/ ___\\|  |/ / |    __)_ /    \\  / __ | \n |    |   \\ / __ \\\\  \\___|    <  |        \\   |  \\/ /_/ | \n |______  /(____  /\\___  >__|_ \\/_______  /___|  /\\____ | \n        \\/      \\/     \\/     \\/        \\/     \\/      \\/ ");
 var builder = WebApplication.CreateBuilder(args);
+
 
 //builder.AddServiceDefaults();
 

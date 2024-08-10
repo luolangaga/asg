@@ -90,7 +90,17 @@ namespace asg_form.Controllers
             return Ok("Image file uploaded successfully.");
 
         }
+        [Route("api/v1/admin/dbgu")]
+        [HttpPost]
+        public async Task<ActionResult<object>> dbgu()
+        {
+           using(TestDbContext db=new TestDbContext())
+            {
+                await db.Database.MigrateAsync();
+            }
+            return Ok("successfully.");
 
+        }
 
         [Route("api/v1/admin/Privacy_Policy")]
         [HttpPost]
