@@ -1,4 +1,5 @@
 ﻿
+using asg_form.Controllers.Store;
 using asg_form.Model;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +53,23 @@ namespace asg_form.Controllers
 
         }
     }
-   
+    public static class QueryableExtensions
+    {
+        public static IQueryable<T> Paginate<T>(this IQueryable<T> query, int pageIndex, int pageSize)
+        {
+            return query.Skip(pageIndex * pageSize).Take(pageSize);
+        }
+    }
+    class STOREConfig : IEntityTypeConfiguration<StoreinfoDB>
+    {
+        public void Configure(EntityTypeBuilder<StoreinfoDB> builder)
+        {
+            builder.ToTable("F_Store");
+            builder.HasOne<StoreDB>(c => c.Store).WithMany(a => a.buyer).IsRequired();
+
+        }
+    }
+
     class newsConfig : IEntityTypeConfiguration<T_news>
     {
         public void Configure(EntityTypeBuilder<T_news> builder)
@@ -163,7 +180,9 @@ namespace asg_form.Controllers
         public DbSet<Champion.T_Champion> Champions { get; set; }
         public DbSet<comform.com_form> com_Forms { get; set; }
         public DbSet<T_Friend> T_Friends { get; set; }
-     
+        public DbSet<StoreDB> T_Store { get; set; }
+        public DbSet<StoreinfoDB> T_Storeinfo { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             string connStr = @"Server=localhost\SQLEXPRESS;Database=master;Trusted_Connection=True;TrustServerCertificate=true";
