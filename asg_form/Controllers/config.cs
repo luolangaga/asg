@@ -66,10 +66,8 @@ using(TestDbContext db=new TestDbContext()){
     public async Task<ActionResult<object>> config_get_title([FromBody] string title)
     {
 
-        if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
-        {
-            return BadRequest(new error_mb { code = 400, message = "无权访问" });
-        }
+       
+
         using (TestDbContext db = new TestDbContext())
         {
             var config = db.T_config.FirstOrDefault(a => a.Title == title);

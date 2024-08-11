@@ -115,6 +115,9 @@ namespace asg_form.Controllers.Store
             }
         }
 
+
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -138,23 +141,24 @@ namespace asg_form.Controllers.Store
                 IQueryable<StoreinfoDB> b;
                 if (showVerification)
                 {
-                     b = sb.T_Storeinfo;
+                     b = sb.T_Storeinfo.Include(a=>a.Store);
                 }
                 else
                 {
-                    b = sb.T_Storeinfo.Where(a=>a.isVerification==false);
+                    b = sb.T_Storeinfo.Include(a => a.Store).Where(a => a.isVerification == false);
                 }
                if (search_id == null)
                 {
                     a.cout = b.Count();
-                    a.msg = await b.Paginate(pageindex, pagesize).ToListAsync();
+                    a.msg = await b.Paginate(pageindex, pagesize).Select(a => new { a.id, a.buyerid, a.Store.Price, a.Store.description, a.isVerification, a.Store.information, a.Store.Name }).ToListAsync();
                  
                 }
                 else
                 {
                     a.cout = b.Where(a => a.buyerid == search_id).Count();
-                    a.msg = await b.Where(a => a.buyerid == search_id).Paginate(pageindex, pagesize).ToListAsync();
+                    a.msg = await b.Where(a => a.buyerid == search_id).Paginate(pageindex, pagesize).Select(a => new { a.id, a.buyerid, a.Store.Price, a.Store.description, a.isVerification, a.Store.information, a.Store.Name }).ToListAsync();
                 }
+               
                 return Ok(a);
             }
         }
@@ -185,7 +189,7 @@ namespace asg_form.Controllers.Store
                 List<buyreq_record> bureq = new List<buyreq_record>();
                 foreach (var item in storeid)
                 {
-                    var stort = await sb.T_Store.FindAsync(storeid);
+                    var stort = await sb.T_Store.FindAsync(item);
                     try
                     {
                         user.Integral = cut_value((long)user.Integral, stort.Price);

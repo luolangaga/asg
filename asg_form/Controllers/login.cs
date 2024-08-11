@@ -259,13 +259,20 @@ namespace asg_form.Controllers
         [Authorize]
         [Route("api/v1/user/")]
         [HttpGet]
-        public async Task<ActionResult<post_user>> getuser()
+        public async Task<ActionResult<post_user>> getuser(bool showbase64=true)
         {
             string id = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var user = await userManager.FindByIdAsync(id);
             var isadmin = await userManager.IsInRoleAsync(user, "admin");
             List<string> roles = (List<string>)await userManager.GetRolesAsync(user);
-            return new post_user { id = id.ToInt64(), Base64 = user.UserBase64, name = user.UserName, chinaname = user.chinaname, email = user.Email, isadmin = isadmin, Roles = roles, officium = user.officium };
+            if (showbase64) {
+                return new post_user { id = id.ToInt64(), money = user.Integral, Base64 = user.UserBase64, name = user.UserName, chinaname = user.chinaname, email = user.Email, isadmin = isadmin, Roles = roles, officium = user.officium };
+            }
+            else
+            {
+                return new post_user { id = id.ToInt64(), money = user.Integral,  name = user.UserName, chinaname = user.chinaname, email = user.Email, isadmin = isadmin, Roles = roles, officium = user.officium };
+
+            }
 
         }
 
@@ -279,6 +286,7 @@ namespace asg_form.Controllers
             public string? email { get; set; }
             public bool isadmin { get; set; }
             public string? officium { get; set; }
+            public long? money {  get; set; }
 
             public List<string>? Roles { get; set; }
 
