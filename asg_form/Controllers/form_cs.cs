@@ -1,6 +1,7 @@
 
+using System.Security.Cryptography;
+using System.Runtime.InteropServices.ComTypes;
 using asg_form.Controllers.Hubs;
-using asg_form.Model;
 using Manganese.Text;
 using Masuit.Tools;
 using Masuit.Tools.Win32.AntiVirus;
@@ -21,6 +22,7 @@ using System.Text;
 using System.Web;
 using static asg_form.Controllers.excel;
 using static 所有队伍;
+using Manganese.Array;
 
 namespace asg_form.Controllers
 {
@@ -162,7 +164,7 @@ namespace asg_form.Controllers
         }
 
 
-        /// <summary>
+   /// <summary>
         /// 提交表单
         /// </summary>
         /// <param name="for1">表单信息</param>
@@ -237,6 +239,81 @@ namespace asg_form.Controllers
                 return BadRequest(new error_mb { code = 400, message = "人机验证未通过" });
 
             }
+
+
+        }
+
+
+
+
+        /// <summary>
+        /// 提交表单
+        /// </summary>
+        /// <param name="imageFile"></param>
+        /// <param name="for1">表单信息</param>
+        /// <param name="captoken">谷歌人机验证验证码</param>
+        /// <returns></returns>
+        [Route("api/v2/form/")]
+        [HttpPost]
+        public async Task<ActionResult<string>> PostAsync(IFormFile imageFile,[FromForm] form_get_new for1)
+        {
+
+                    TestDbContext ctx = new TestDbContext();
+
+
+                    if (ctx.Forms.Include(a=>a.events).Where(a=>a.events.name==for1.events_name).Any(e => e.team_name == for1.team_name))
+                    {
+                    return BadRequest(new error_mb { code = 400, message = "有重名队伍" });
+                }
+                else
+                    {
+                         if (imageFile == null || imageFile.Length == 0)
+                return BadRequest("Invalid image file.");
+            // 将文件保存到磁盘
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), $"loge/{for1.events_name}/", $"{imageFile.FileName}");
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }    // 返回成功响应
+                      //  base64toimg(for1.logo_base64, $@"{AppDomain.CurrentDomain.BaseDirectory}loge\{for1.events_name}\{for1.team_name}.png");
+                  var events= await ctx.events.FirstAsync(ctx => ctx.name == for1.events_name);
+
+
+                        form form1 = new form();
+                        form1.logo_uri = $"https://124.223.35.239/loge/{for1.events_name}/{for1.team_name}.png";
+                        form1.team_name = for1.team_name;
+                        form1.team_password = for1.team_password;
+                        form1.team_tel = for1.team_tel;
+                        form1.events = events;
+                    
+                        List<role> role = new List<role>();
+                        foreach (role_get a in for1.role_get)
+                        {
+                            role.Add(new role { role_id = a.role_id, role_lin = a.role_lin, role_name = a.role_name,Common_Roles=a.Common_Roles,Historical_Ranks=a.Historical_Ranks,Id_Card=a.Id_Card,Game_Name=a.Game_Name,Phone_Number=a.Phone_Number,Id_Card_Name=a.Id_Card_Name });
+                        }
+                        form1.role = role;
+
+                        ctx.Forms.Add(form1);
+                        await ctx.SaveChangesAsync();
+                    int nownumber = ctx.Forms.Count();
+                    //ChatRoomHub chat = new ChatRoomHub();
+                    // await chat.formok(nownumber, for1.team_name);
+                    try
+                    {
+                        await hubContext.Clients.All.SendAsync("formok", $"队伍{for1.team_name}已经成功报名，剩余队伍名额：{ctx.Forms.Count()}/32");
+
+                    }
+                    catch
+                    {
+
+
+                    }
+                    logger.Info($"有新队伍报名！队伍名称：{for1.team_name} ");
+                    }
+
+
+                    return "ok!";
+
 
 
         }
@@ -394,6 +471,7 @@ namespace asg_form.Controllers
         public async Task<ActionResult<List<string>>> search_name(string team_name,string events_name)
         {
             var ctx = new TestDbContext();
+            
             var data = ctx.Forms.Where(a => a.team_name.IndexOf(team_name) >= 0&&a.events.name==events_name).Select(a => a.team_name).ToList();
             return data;
         }
@@ -440,7 +518,8 @@ namespace asg_form.Controllers
         public string team_password { get; set; }
         public string team_tel { get; set; }
         public string logo_uri { get; set; }
-        public T_events events { get; set; }
+        public Events.T_events events { get; set; }
+        
       //  public string? belong { get; set; }
         public List<role> role { get; set; } = new List<role>();
     }
@@ -448,11 +527,24 @@ namespace asg_form.Controllers
     public class form_get
     {
 
+       // public DateTime time { get; set; } = DateTime.Now;
+        public string team_name { get; set; }
+        public string team_password { get; set; }
+        public string team_tel { get; set; }
+       public string logo_base64 { get; set; }
+        public string events_name { get; set; }
+      //  public string? belong { get; set; }
+        public List<role_get> role_get { get; set; }
+    }
+
+      public class form_get_new
+    {
+
         public DateTime time { get; set; } = DateTime.Now;
         public string team_name { get; set; }
         public string team_password { get; set; }
         public string team_tel { get; set; }
-        public string logo_base64 { get; set; }
+      // public string logo_base64 { get; set; }
         public string events_name { get; set; }
       //  public string? belong { get; set; }
         public List<role_get> role_get { get; set; }
@@ -465,7 +557,7 @@ namespace asg_form.Controllers
     {
 
         public long Id { get; set; }
-        public string team_name { get; set; }
+        public string Team_name { get; set; }
         public string team_password { get; set; }
         public string team_tel { get; set; }
 

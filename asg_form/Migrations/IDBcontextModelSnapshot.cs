@@ -152,29 +152,60 @@ namespace asg_form.Migrations
                     b.ToTable("F_Champion", (string)null);
                 });
 
-            modelBuilder.Entity("asg_form.Controllers.Events+T_events", b =>
+            modelBuilder.Entity("asg_form.Controllers.Store.StoreDB", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("id"));
 
-                    b.Property<string>("events_rule_uri")
+                    b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("is_over")
+                    b.Property<long>("Price")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("information")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("T_Store", (string)null);
+                });
+
+            modelBuilder.Entity("asg_form.Controllers.Store.StoreinfoDB", b =>
+                {
+                    b.Property<long>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("id"));
+
+                    b.Property<long>("Storeid")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("buyerid")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("isVerification")
                         .HasColumnType("bit");
 
-                    b.Property<string>("name")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("id");
 
-                    b.Property<DateTime?>("opentime")
-                        .HasColumnType("datetime2");
+                    b.HasIndex("Storeid");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("F_events", (string)null);
+                    b.ToTable("T_Storeinfo", (string)null);
                 });
 
             modelBuilder.Entity("asg_form.Controllers.T_Friend", b =>
@@ -455,6 +486,31 @@ namespace asg_form.Migrations
                     b.ToTable("F_game", (string)null);
                 });
 
+            modelBuilder.Entity("asg_form.Model.T_events", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("events_rule_uri")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("is_over")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("opentime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("F_events", (string)null);
+                });
+
             modelBuilder.Entity("asg_form.Role", b =>
                 {
                     b.Property<long>("Id")
@@ -514,6 +570,9 @@ namespace asg_form.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<long?>("Integral")
+                        .HasColumnType("bigint");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -561,6 +620,9 @@ namespace asg_form.Migrations
 
                     b.Property<string>("officium")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("point")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -658,7 +720,7 @@ namespace asg_form.Migrations
 
             modelBuilder.Entity("asg_form.Controllers.Champion+T_Champion", b =>
                 {
-                    b.HasOne("asg_form.Controllers.Events+T_events", "events")
+                    b.HasOne("asg_form.Model.T_events", "events")
                         .WithMany()
                         .HasForeignKey("eventsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -675,9 +737,20 @@ namespace asg_form.Migrations
                     b.Navigation("form");
                 });
 
+            modelBuilder.Entity("asg_form.Controllers.Store.StoreinfoDB", b =>
+                {
+                    b.HasOne("asg_form.Controllers.Store.StoreDB", "Store")
+                        .WithMany("buyer")
+                        .HasForeignKey("Storeid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Store");
+                });
+
             modelBuilder.Entity("asg_form.Controllers.form", b =>
                 {
-                    b.HasOne("asg_form.Controllers.Events+T_events", "events")
+                    b.HasOne("asg_form.Model.T_events", "events")
                         .WithMany("forms")
                         .HasForeignKey("eventsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -717,9 +790,9 @@ namespace asg_form.Migrations
                     b.Navigation("haveform");
                 });
 
-            modelBuilder.Entity("asg_form.Controllers.Events+T_events", b =>
+            modelBuilder.Entity("asg_form.Controllers.Store.StoreDB", b =>
                 {
-                    b.Navigation("forms");
+                    b.Navigation("buyer");
                 });
 
             modelBuilder.Entity("asg_form.Controllers.form", b =>
@@ -730,6 +803,11 @@ namespace asg_form.Migrations
             modelBuilder.Entity("asg_form.Controllers.schedule+team_game", b =>
                 {
                     b.Navigation("logs");
+                });
+
+            modelBuilder.Entity("asg_form.Model.T_events", b =>
+                {
+                    b.Navigation("forms");
                 });
 #pragma warning restore 612, 618
         }

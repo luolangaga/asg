@@ -120,9 +120,51 @@ namespace asg_form.Controllers
 
         }
 
+        /// <summary>
+        /// 修改新闻
+        /// </summary>
+        /// <param name="req_News">新闻内容</param>
+        /// <returns></returns>
+        [Authorize]
+        [Route("api/v1/admin/news/")]
+        [HttpPut]
+        public async Task<ActionResult<string>> Put([FromBody] req_news req_News,long newsid)
+        {
+            string id = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            var user = await userManager.FindByIdAsync(id);
+
+
+
+            bool a = await userManager.IsInRoleAsync(user, "admin");
+            if (a)
+            {
+                using (TestDbContext ctx = new TestDbContext())
+                {
+                    var qwq= await ctx.news.FindAsync(newsid);
+                    qwq.msg=req_News.msg;
+                    qwq.Title=req_News.Title;
+                    qwq.FormName = user.UserName;
+                    await ctx.SaveChangesAsync();
+                   
+                }
+                  
+                return "ok!";
+            }
+            else
+            {
+                return "无权访问";
+            }
+
+        }
+
     }
 
-    public class T_news
+
+}
+
+
+
+public class T_news
     {
         public long Id { get; set; }
         public string Title { get; set; }
@@ -144,4 +186,3 @@ namespace asg_form.Controllers
     
     }
 
-}

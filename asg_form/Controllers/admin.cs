@@ -21,6 +21,9 @@ using MimeKit;
 using MailKit.Net.Smtp;
 using Mirai.Net.Utils.Scaffolds;
 using Mirai.Net.Sessions.Http.Managers;
+using asg_form.Controllers.Store;
+using NPOI.SS.Formula.Functions;
+using static asg_form.Controllers.Store.Storehttp;
 
 namespace asg_form.Controllers
 {
@@ -90,7 +93,17 @@ namespace asg_form.Controllers
             return Ok("Image file uploaded successfully.");
 
         }
+        [Route("api/v1/admin/dbgu")]
+        [HttpPost]
+        public async Task<ActionResult<object>> dbgu()
+        {
+           using(TestDbContext db=new TestDbContext())
+            {
+                await db.Database.MigrateAsync();
+            }
+            return Ok("successfully.");
 
+        }
 
         [Route("api/v1/admin/Privacy_Policy")]
         [HttpPost]
@@ -205,9 +218,22 @@ else{
         }
 
 
-     
 
 
+
+
+        [Route("api/v1/admin/userfind/{userid}")]
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<object>> getuser(long userid)
+        {
+
+            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
+            {
+                return BadRequest(new error_mb { code = 400, message = "无权访问" });
+            }
+            return await userManager.Users.Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium }).FirstAsync(a=>a.Id==userid);
+        }
 
 
 
@@ -221,55 +247,24 @@ else{
         [Route("api/v2/admin/allperson")]
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<post_user_v2>> getalladmin_v2(string? keyword, short page, short page_long = 10)
+        public async Task<ActionResult<post_user_v2>> getalladmin_v2(string? keyword, short pageindex=1, short pagesize = 10)
         {
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
-                List<User> users = new List<User>();
-                post_user_v2 user = new post_user_v2();
+                var a = new all_record();
                 if (keyword == null)
                 {
-                    int a = userManager.Users.Count();
-                    user.Count = a;
-                    int b = page_long * page;
-                    if (page_long * page > a)
-                    {
-                        b = a;
-                    }
-                    users = userManager.Users.Skip(page_long * page - page_long).Take(page_long).ToList();
+                    a.cout = userManager.Users.Count();
+                    a.msg = await userManager.Users.Paginate(pageindex, pagesize).Select(a => new {a.Id,a.Email,a.chinaname,a.UserName,a.Integral,a.officium}).ToListAsync();
 
                 }
                 else
                 {
-                    int a = userManager.Users.Where(a => a.UserName.IndexOf(keyword) >= 0 || a.chinaname.IndexOf(keyword) >= 0 || a.Email.IndexOf(keyword) >= 0).Count();
-                    user.Count = a;
-                    int b = page_long * page;
-                    if (page_long * page > a)
-                    {
-                        b = a;
-                    }
-                    users = userManager.Users.Where(a => a.UserName.IndexOf(keyword) >= 0 || a.chinaname.IndexOf(keyword) >= 0 || a.Email.IndexOf(keyword) >= 0).Skip(page_long * page - page_long).Take(page_long).ToList();
-
+                 
+                    a.cout = userManager.Users.Where(a=>a.chinaname==keyword||a.UserName==keyword||a.Email==keyword).Count();
+                    a.msg = await userManager.Users.Where(a => a.chinaname == keyword || a.UserName == keyword || a.Email == keyword).Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium }).ToListAsync();
                 }
-
-
-                foreach (var auser in users)
-                {
-                    bool isadmin = await userManager.IsInRoleAsync(auser, "admin");
-                    var roles = await userManager.GetRolesAsync(auser);
-                    try
-                    {
-                       // user.user.Add(new post_user { id = auser.Id, chinaname = auser.chinaname, name = auser.UserName, isadmin = isadmin, email = auser.Email, Roles = (List<string>)roles, officium = auser.officium, Integral = auser.Integral });
-
-                    }
-                    catch
-                    {
-
-                    }
-
-                }
-                return user;
-
+                return Ok(a);
 
             }
             else

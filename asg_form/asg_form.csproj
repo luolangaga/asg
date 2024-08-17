@@ -51,6 +51,7 @@
 
   <ItemGroup>
     <Folder Include="Controllers\PlayerC\" />
+    <Folder Include="Model\" />
   </ItemGroup>
 
 </Project>

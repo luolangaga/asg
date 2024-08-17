@@ -1,5 +1,5 @@
 ﻿
-using asg_form.Model;
+using asg_form.Controllers.Store;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.DataEncryption;
@@ -35,7 +35,7 @@ namespace asg_form.Controllers
             builder.Property(e => e.team_password).IsRequired();
             builder.Property(e => e.time).IsRequired();
             builder.Property(e => e.piaoshu).IsRequired();
-              builder.HasOne<T_events>(c => c.events).WithMany(a => a.forms).IsRequired();
+              builder.HasOne<Events.T_events>(c => c.events).WithMany(a => a.forms).IsRequired();
           
         }
     }
@@ -52,7 +52,32 @@ namespace asg_form.Controllers
 
         }
     }
-   
+    public static class QueryableExtensions
+    {
+        public static IQueryable<T> Paginate<T>(this IQueryable<T> query, int pageIndex, int pageSize)
+        {
+            return query.Skip(pageIndex * pageSize).Take(pageSize);
+        }
+    }
+    class STOREConfig : IEntityTypeConfiguration<StoreinfoDB>
+    {
+        public void Configure(EntityTypeBuilder<StoreinfoDB> builder)
+        {
+            builder.ToTable("T_Storeinfo");
+            builder.HasOne<StoreDB>(c => c.Store).WithMany(a => a.buyer).IsRequired();
+
+        }
+    }
+    class STORConfig : IEntityTypeConfiguration<StoreDB>
+    {
+        public void Configure(EntityTypeBuilder<StoreDB> builder)
+        {
+            builder.ToTable("T_Store");
+        
+
+        }
+    }
+
     class newsConfig : IEntityTypeConfiguration<T_news>
     {
         public void Configure(EntityTypeBuilder<T_news> builder)
@@ -103,9 +128,9 @@ namespace asg_form.Controllers
             builder.HasOne<schedule.team_game>(e => e.team).WithMany(o=>o.logs).IsRequired();
         }
     }
-    class EventsConfig : IEntityTypeConfiguration<T_events>
+    class EventsConfig : IEntityTypeConfiguration<Events.T_events>
     {
-        public void Configure(EntityTypeBuilder<T_events> builder)
+        public void Configure(EntityTypeBuilder<Events.T_events> builder)
         {
             builder.ToTable("F_events");
             builder.Property(e => e.Id).IsRequired();
@@ -145,10 +170,22 @@ namespace asg_form.Controllers
         }
     }
 
+    class configConfig : IEntityTypeConfiguration<T_config>
+    {
+        public void Configure(EntityTypeBuilder<T_config> builder)
+        {
+            builder.ToTable("T_Config");
+            builder.Property(e => e.Id).IsRequired();
+            builder.Property(a => a.Title);
+            builder.Property(a => a.msg);
+            builder.Property(e => e.Substance);
+
+
+        }
+    }
 
 
 
-  
     class TestDbContext : DbContext
     {
 
@@ -159,11 +196,15 @@ namespace asg_form.Controllers
         public DbSet<blog.blog_db> blogs { get; set; }
         public DbSet<schedule.schedule_log> schlogs { get; set; }
         public DbSet<schedule.team_game> team_Games { get; set; }
-        public DbSet<T_events> events { get; set; }
+        public DbSet<Events.T_events> events { get; set; }
         public DbSet<Champion.T_Champion> Champions { get; set; }
         public DbSet<comform.com_form> com_Forms { get; set; }
         public DbSet<T_Friend> T_Friends { get; set; }
-     
+        public DbSet<StoreDB> T_Store { get; set; }
+        public DbSet<StoreinfoDB> T_Storeinfo { get; set; }
+        public DbSet<T_config> T_config { get; set; }
+
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             string connStr = @"Server=localhost\SQLEXPRESS;Database=master;Trusted_Connection=True;TrustServerCertificate=true";
@@ -177,6 +218,7 @@ namespace asg_form.Controllers
         }
 
     }
+
 
     public class IDBcontext : IdentityDbContext<User, Role, long>
     {
