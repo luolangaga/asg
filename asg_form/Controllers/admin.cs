@@ -324,7 +324,7 @@ else{
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
                 var ouser = await userManager.FindByIdAsync(userid);
-
+               
                 ouser.officium = opname;
                 await userManager.UpdateAsync(ouser);
 
