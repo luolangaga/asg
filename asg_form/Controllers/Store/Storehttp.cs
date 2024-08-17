@@ -116,6 +116,22 @@ namespace asg_form.Controllers.Store
         }
 
 
+        [Route("api/v1/Store/my")]
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<object>> mybuy()
+        {
+            long id = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value.ToInt64();
+
+
+            using (TestDbContext sb = new TestDbContext())
+            {
+                var a = sb.T_Storeinfo.Where(a=>a.buyerid==id).ToListAsync();
+                return Ok(a);
+            }
+        }
+
+
 
 
         /// <summary>

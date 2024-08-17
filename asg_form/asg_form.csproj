@@ -11,6 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\PlayerC\**" />
+    <Content Remove="Controllers\PlayerC\**" />
+    <EmbeddedResource Remove="Controllers\PlayerC\**" />
+    <None Remove="Controllers\PlayerC\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 
@@ -50,7 +57,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\PlayerC\" />
     <Folder Include="Model\" />
   </ItemGroup>
 

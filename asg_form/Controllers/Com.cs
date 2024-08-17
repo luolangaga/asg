@@ -56,7 +56,11 @@ namespace asg_form.Controllers
             var user = await userManager.FindByIdAsync(id);
             if (user.officium == "Commentator")
             {
-             
+                if (user.Integral == null)
+                {
+                    user.Integral = 0;
+                    await userManager.UpdateAsync(user);
+                }
                 TestDbContext testDb = new TestDbContext();
                 string chinaname = user.chinaname;
                 var teamgame = await testDb.team_Games.FirstAsync(a => a.id == gameid);
@@ -107,6 +111,11 @@ namespace asg_form.Controllers
         {
             string id = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var user = await userManager.FindByIdAsync(id);
+            if (user.Integral == null)
+            {
+                user.Integral = 0;
+                await userManager.UpdateAsync(user);
+            }
             if (user.officium == "Commentator")
             {
                 TestDbContext testDb = new TestDbContext();
