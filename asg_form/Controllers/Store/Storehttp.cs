@@ -126,7 +126,7 @@ namespace asg_form.Controllers.Store
 
             using (TestDbContext sb = new TestDbContext())
             {
-                var a = sb.T_Storeinfo.Where(a=>a.buyerid==id).ToListAsync();
+                var a = await sb.T_Storeinfo.Where(a=>a.buyerid==id).ToListAsync();
                 return Ok(a);
             }
         }
