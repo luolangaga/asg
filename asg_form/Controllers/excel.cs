@@ -235,7 +235,7 @@ namespace asg_form.Controllers
             {
 using(TestDbContext ctx =new TestDbContext())
                 {
-                    object data = userManager.Users.Select(a => new {a.UserName,a.chinaname,a.Email,a.officium}).Where(a => a.officium != null).GroupBy(a => a.officium).ToList();
+                    object data = userManager.Users.Select(a => new {a.Id,a.UserName,a.chinaname,a.Email,a.officium}).Where(a => a.officium != null).GroupBy(a => a.officium).ToList();
                     return data;
                 }
                 

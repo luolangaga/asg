@@ -37,7 +37,7 @@ namespace asg_form.Controllers
             {
                 TestDbContext testDb = new TestDbContext();
                 string chinaname = user.chinaname;
-                var teamgame = testDb.team_Games.Where(a => a.commentary.IndexOf(chinaname) >= 0).Select(a => new { a.id, a.team1_name, a.team2_name, a.bilibiliuri, a.commentary, a.referee, a.opentime,a.tag,a.belong}).ToList();
+                var teamgame = testDb.team_Games.Where(a => a.commentary.IndexOf(chinaname) >= 0).Select(a => new { a.id, a.team1_name, a.team2_name, a.bilibiliuri, a.commentary, a.referee ,a.opentime}).ToList();
 
                 return JsonConvert.SerializeObject(teamgame);
             }
