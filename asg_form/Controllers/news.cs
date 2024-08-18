@@ -109,7 +109,7 @@ namespace asg_form.Controllers
             if (a)
             {
                 TestDbContext ctx = new TestDbContext();
-                await ctx.news.AddAsync(new T_news { Title = req_News.Title, msg = req_News.msg, FormName = user.UserName ,time=DateTime.Now,Type=req_News.Type});
+                await ctx.news.AddAsync(new T_news { Title = req_News.Title, msg = req_News.msg,Type=req_News.Type, FormName = user.UserName ,time=DateTime.Now});
                 await ctx.SaveChangesAsync();
                 return "ok!";
             }

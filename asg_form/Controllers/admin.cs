@@ -249,28 +249,39 @@ else{
         [Authorize]
         public async Task<ActionResult<post_user_v2>> getalladmin_v2(string? keyword, short pageindex=1, short pagesize = 10)
         {
-            string id = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-            var user = await userManager.FindByIdAsync(id);
-            var isadmin = await userManager.IsInRoleAsync(user, "admin");
-            List<string> roles = (List<string>)await userManager.GetRolesAsync(user);
-            if (isadmin)
+            if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
-                var a = new all_record();
-                
-                if (keyword == null)
-                {
-                    a.cout = userManager.Users.Count();
-                    a.msg = await userManager.Users.Paginate(pageindex, pagesize).Select(a => new {a.Id,a.Email,a.chinaname,a.UserName,a.Integral,a.officium}).ToListAsync();
+                var users = userManager.Users;
+                var userList = new List<object>();
 
-                }
-                else
+                foreach (var user in users)
                 {
-                 
-                    a.cout = userManager.Users.Where(a=>a.chinaname==keyword||a.UserName==keyword||a.Email==keyword).Count();
-                    a.msg = await userManager.Users.Where(a => a.chinaname == keyword || a.UserName == keyword || a.Email == keyword).Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium }).ToListAsync();
-                }
-                return Ok(new { data = a,isadmin, roles  });
+                    var isAdmin = await userManager.IsInRoleAsync(user, "admin");
+                    var roles = await userManager.GetRolesAsync(user);
 
+                    userList.Add(new
+                    {
+                        user.Id,
+                        user.Email,
+                        user.chinaname,
+                        user.UserName,
+                        user.Integral,
+                        user.officium,
+                        isAdmin,
+                        roles
+                    });
+                }
+
+                var pagedUsers = userList.Skip((pageindex - 1) * pagesize).Take(pagesize).ToList();
+                var totalCount = userList.Count;
+
+                var result = new all_record
+                {
+                    cout = totalCount,
+                    msg = pagedUsers
+                };
+
+                return Ok(result);
             }
             else
             {
