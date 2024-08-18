@@ -109,7 +109,7 @@ namespace asg_form.Controllers
             if (a)
             {
                 TestDbContext ctx = new TestDbContext();
-                await ctx.news.AddAsync(new T_news { Title = req_News.Title, msg = req_News.msg, FormName = user.UserName ,time=DateTime.Now});
+                await ctx.news.AddAsync(new T_news { Title = req_News.Title, msg = req_News.msg, FormName = user.UserName ,time=DateTime.Now,Type=req_News.Type});
                 await ctx.SaveChangesAsync();
                 return "ok!";
             }
@@ -144,6 +144,7 @@ namespace asg_form.Controllers
                     qwq.msg=req_News.msg;
                     qwq.Title=req_News.Title;
                     qwq.FormName = user.UserName;
+                    qwq.Type = req_News.Type;
                     await ctx.SaveChangesAsync();
                    
                 }
@@ -172,7 +173,8 @@ public class T_news
         public DateTime? time { get; set; }
 
         public string msg { get; set; }
-    }
+        public string Type { get; set; }
+}
 
     public class req_news { 
         /// <summary>
@@ -183,6 +185,7 @@ public class T_news
  /// 内容，推荐使用markdown格式
  /// </summary>
         public string msg { get; set; }
-    
-    }
+        public string Type { get; set; }
+
+}
 
