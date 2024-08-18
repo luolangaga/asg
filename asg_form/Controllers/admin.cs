@@ -249,9 +249,14 @@ else{
         [Authorize]
         public async Task<ActionResult<post_user_v2>> getalladmin_v2(string? keyword, short pageindex=1, short pagesize = 10)
         {
-            if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
+            string id = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            var user = await userManager.FindByIdAsync(id);
+            var isadmin = await userManager.IsInRoleAsync(user, "admin");
+            List<string> roles = (List<string>)await userManager.GetRolesAsync(user);
+            if (isadmin)
             {
                 var a = new all_record();
+                
                 if (keyword == null)
                 {
                     a.cout = userManager.Users.Count();
@@ -264,7 +269,7 @@ else{
                     a.cout = userManager.Users.Where(a=>a.chinaname==keyword||a.UserName==keyword||a.Email==keyword).Count();
                     a.msg = await userManager.Users.Where(a => a.chinaname == keyword || a.UserName == keyword || a.Email == keyword).Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium }).ToListAsync();
                 }
-                return Ok(a);
+                return Ok(new { data = a,isadmin, roles  });
 
             }
             else

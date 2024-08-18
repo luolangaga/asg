@@ -87,6 +87,7 @@ namespace asg_form.Controllers
             builder.Property(e => e.msg).IsRequired();
             builder.Property(e => e.Title).IsRequired();
             builder.Property(e => e.time).IsRequired();
+            builder.Property(e => e.Type).IsRequired();
         }
     }
 
