@@ -85,7 +85,7 @@ namespace asg_form.Controllers
         }
 
 
-            [Route("api/v1/Champion/")]
+        [Route("api/v1/Champion/")]
         [HttpGet]
         public async Task<ActionResult<List<Champion.T_Champion>>> getchampion()
         {

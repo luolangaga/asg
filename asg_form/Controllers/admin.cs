@@ -247,51 +247,31 @@ else{
         [Route("api/v2/admin/allperson")]
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<post_user_v2>> getalladmin_v2(string? keyword, short pageindex=1, short pagesize = 10)
+        public async Task<ActionResult<post_user_v2>> getalladmin_v2(string? keyword, short pageindex = 1, short pagesize = 10)
         {
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
-                var users = userManager.Users;
-                var userList = new List<object>();
+                var a = new all_record();
 
-                foreach (var user in users)
+                if (keyword == null)
                 {
-                    var isAdmin = await userManager.IsInRoleAsync(user, "admin");
-                    var roles = await userManager.GetRolesAsync(user);
+                    a.cout = userManager.Users.Count();
+                    a.msg = await userManager.Users.Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium }).ToListAsync();
 
-                    userList.Add(new
-                    {
-                        user.Id,
-                        user.Email,
-                        user.chinaname,
-                        user.UserName,
-                        user.Integral,
-                        user.officium,
-                        isAdmin,
-                        roles
-                    });
                 }
-
-                var pagedUsers = userList.Skip((pageindex - 1) * pagesize).Take(pagesize).ToList();
-                var totalCount = userList.Count;
-
-                var result = new all_record
+                else
                 {
-                    cout = totalCount,
-                    msg = pagedUsers
-                };
 
-                return Ok(result);
+                    a.cout = userManager.Users.Where(a => a.chinaname == keyword || a.UserName == keyword || a.Email == keyword).Count();
+                    a.msg = await userManager.Users.Where(a => a.chinaname == keyword || a.UserName == keyword || a.Email == keyword).Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium }).ToListAsync();
+                }
+                return Ok(a);
             }
             else
             {
                 return BadRequest(new error_mb { code = 400, message = "无权访问" });
 
             }
-
-
-
-
         }
 
         public class post_user_v2
