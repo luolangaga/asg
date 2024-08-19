@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
 using System.Net;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace asg_form.Controllers
 {
@@ -55,12 +57,20 @@ namespace asg_form.Controllers
         /// <returns></returns>
         [Route("api/v1/news/")]
         [HttpGet]
-        public async Task<ActionResult<List<T_news>>> getnews()
+        public async Task<ActionResult<List<T_news>>> getnews([FromQuery] string type = null)
         {
            
 
             TestDbContext test =new TestDbContext();
-            return test.news.OrderByDescending(a => a.Id).ToList();
+
+            var query = test.news.AsQueryable();
+
+            if (!string.IsNullOrEmpty(type))
+            {
+                query = query.Where(n => n.Type == type);
+            }
+
+            return query.OrderByDescending(a => a.Id).ToList();
 
         }
 
@@ -140,7 +150,7 @@ namespace asg_form.Controllers
             {
                 using (TestDbContext ctx = new TestDbContext())
                 {
-                    var qwq= await ctx.news.Where(n => n.Id == newsid && n.Type == req_News.Type).FindAsync(newsid);
+                    var qwq= await ctx.news.FindAsync(newsid);
                     if (qwq == null)
                     {
                         return NotFound("News item not found or type mismatch.");
