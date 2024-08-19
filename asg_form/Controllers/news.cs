@@ -140,7 +140,11 @@ namespace asg_form.Controllers
             {
                 using (TestDbContext ctx = new TestDbContext())
                 {
-                    var qwq= await ctx.news.FindAsync(newsid);
+                    var qwq= await ctx.news.Where(n => n.Id == newsid && n.Type == req_News.Type).FindAsync(newsid);
+                    if (qwq == null)
+                    {
+                        return NotFound("News item not found or type mismatch.");
+                    }
                     qwq.msg=req_News.msg;
                     qwq.Title=req_News.Title;
                     qwq.FormName = user.UserName;

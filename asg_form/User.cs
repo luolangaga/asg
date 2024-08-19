@@ -21,7 +21,9 @@ namespace asg_form
         public string? officium { get; set; }
 
         public int point {  get; set; }
-        
+
+        public bool isadmin { get; set; }
+        public List<string>? Roles { get; set; }
     }
 
     public class Role : IdentityRole<long>

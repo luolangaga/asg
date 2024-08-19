@@ -249,21 +249,22 @@ else{
         [Authorize]
         public async Task<ActionResult<post_user_v2>> getalladmin_v2(string? keyword, short pageindex = 1, short pagesize = 10)
         {
-            if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
+            bool isAdmin = this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin");
+            if (isAdmin)
             {
                 var a = new all_record();
 
                 if (keyword == null)
                 {
                     a.cout = userManager.Users.Count();
-                    a.msg = await userManager.Users.Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium }).ToListAsync();
-
+                    a.msg = await userManager.Users.Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium,a.isadmin ,a.Roles}).ToListAsync();
+           
                 }
                 else
                 {
 
                     a.cout = userManager.Users.Where(a => a.chinaname == keyword || a.UserName == keyword || a.Email == keyword).Count();
-                    a.msg = await userManager.Users.Where(a => a.chinaname == keyword || a.UserName == keyword || a.Email == keyword).Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium }).ToListAsync();
+                    a.msg = await userManager.Users.Where(a => a.chinaname == keyword || a.UserName == keyword || a.Email == keyword).Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium, a.isadmin, a.Roles }).ToListAsync();
                 }
                 return Ok(a);
             }
