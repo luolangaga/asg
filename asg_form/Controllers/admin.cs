@@ -257,14 +257,14 @@ else{
                 if (keyword == null)
                 {
                     a.cout = userManager.Users.Count();
-                    a.msg = await userManager.Users.Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium,a.isadmin ,a.Roles}).ToListAsync();
+                    a.msg = await userManager.Users.Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium}).ToListAsync();
            
                 }
                 else
                 {
 
                     a.cout = userManager.Users.Where(a => a.chinaname == keyword || a.UserName == keyword || a.Email == keyword).Count();
-                    a.msg = await userManager.Users.Where(a => a.chinaname == keyword || a.UserName == keyword || a.Email == keyword).Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium, a.isadmin, a.Roles }).ToListAsync();
+                    a.msg = await userManager.Users.Where(a => a.chinaname == keyword || a.UserName == keyword || a.Email == keyword).Paginate(pageindex, pagesize).Select(a => new { a.Id, a.Email, a.chinaname, a.UserName, a.Integral, a.officium}).ToListAsync();
                 }
                 return Ok(a);
             }
