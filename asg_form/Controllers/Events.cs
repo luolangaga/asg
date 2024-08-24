@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using asg_form.Controllers.Team;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -162,17 +163,7 @@ namespace asg_form.Controllers
         }
 
 
-        public class T_events
-        {
-            public int Id { get; set; }
-            public string? name { get; set; }
-            public bool? is_over { get; set; }
-            public DateTime? opentime { get; set; }
-            public List<form>? forms { get; set; }
-            public Uri? events_rule_uri { get; set; }
-            public string? promChart { get; set; }
-
-        }
+ 
         public class events_get
         {
             public int Id { get; set; }
@@ -182,5 +173,17 @@ namespace asg_form.Controllers
             public string rule_markdown { get; set; }
 
         }
+    }
+    public class T_events
+    {
+        public int Id { get; set; }
+        public string? name { get; set; }
+        public bool? is_over { get; set; }
+        public DateTime? opentime { get; set; }
+        public List<T_Team> Teams {  get; set; }=new List<T_Team>();
+        public List<form>? forms { get; set; }
+        public Uri? events_rule_uri { get; set; }
+        public string? promChart { get; set; }
+
     }
 }

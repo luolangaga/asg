@@ -110,7 +110,7 @@ namespace asg_form.Controllers
         {
             public long Id { get; set; }
             public form form { get; set; }
-            public Events.T_events events { get; set; }
+            public T_events events { get; set; }
             public string msg { get; set; }
 
         }

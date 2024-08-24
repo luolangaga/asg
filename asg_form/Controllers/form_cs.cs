@@ -518,7 +518,7 @@ namespace asg_form.Controllers
         public string team_password { get; set; }
         public string team_tel { get; set; }
         public string logo_uri { get; set; }
-        public Events.T_events events { get; set; }
+        public T_events events { get; set; }
         
       //  public string? belong { get; set; }
         public List<role> role { get; set; } = new List<role>();
