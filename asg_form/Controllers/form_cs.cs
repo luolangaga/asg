@@ -367,58 +367,7 @@ namespace asg_form.Controllers
         }
 
 
-        /// <summary>
-        /// 获得所有表单信息
-        /// </summary>
-        /// <param name="page">页数</param>
-        /// <param name="page_long">每页长度</param>
-        /// <returns></returns>
-
-        [Route("api/v1/form/all")]
-        [HttpGet]
-        [Authorize]
-        public List<team> Getform(short page,short page_long,string sort,string eventsname)
-        {
-            TestDbContext ctx = new TestDbContext();
-
-
-            int c = ctx.Forms.Count();
-            int b = page_long * page;
-            if (page_long * page > c)
-            {
-                b = c;
-            }
-          var events=  ctx.events.First(ctx => ctx.name == eventsname);
-           List<form> forms;
-            if(sort=="vote")
-            {
-                forms = ctx.Forms.Include(a => a.role).Include(a=>a.events).OrderByDescending(a => a.piaoshu).Where(a=>a.events==events).Skip(page_long * page - page_long).Take(page_long).ToList();
-            }
-            else
-            {
-                //改为按照id倒序排序
-              //forms = ctx.Forms.Include(a => a.role).Skip(page_long * page - page_long).Take(page_long).ToList();
-              forms = ctx.Forms.Include(a => a.role).Include(a => a.events).OrderByDescending(a => a.Id).Where(a => a.events == events).Skip(page_long * page - page_long).Take(page_long).ToList();
-
-            }
-            List<team> teams = new List<team>();
-
-
-            foreach (form for1 in forms)
-            {
-                var team = new team { id=for1.Id,name = for1.team_name, timer = for1.time, piaoshu = for1.piaoshu ,logo_uri=for1.logo_uri};
-                foreach (var role in for1.role)
-                {
-                    team.rolename.Add(new roletwo { name = role.role_name, lin = role.role_lin });
-                }
-                teams.Add(team);
-               // a++;
-            }
-            return teams;
-        }
-
-
-
+  
 
 
 
@@ -545,7 +494,7 @@ namespace asg_form.Controllers
         public string team_password { get; set; }
         public string team_tel { get; set; }
       // public string logo_base64 { get; set; }
-        public string events_name { get; set; }
+        public string? events_name { get; set; }
       //  public string? belong { get; set; }
         public List<role_get> role_get { get; set; }
     }
@@ -595,17 +544,11 @@ public class 所有队伍 : ControllerBase
     {
         public long id {  get; set; }
         public string name { get; set; }
-        public DateTime timer { get; set; }
+        public long timer { get; set; }
         public int piaoshu { get; set; }
         public string logo_uri { get; set; }
-        public List<roletwo> rolename { get; set; }=new List<roletwo>();
     }
 
-    public class roletwo
-    {
-        public string name { get; set; }
-        public string lin { get; set; }
-    }
 
 
 

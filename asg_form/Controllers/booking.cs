@@ -27,6 +27,7 @@ namespace asg_form.Controllers
 
         [Route("api/newbooking")]
         [HttpPost]
+
         public async Task<ActionResult<string>> newbooking()
         {
             string username = this.User.FindFirst(ClaimTypes.Name)!.Value;

@@ -5,13 +5,13 @@
 
         public List<T_events> Events { get; set; }=new List<T_events>();
         public long Id { get; set; }
+        public bool is_check {  get; set; }
         public int piaoshu { get; set; }
-        public DateTime time { get; set; } = DateTime.Now;
+        public long time { get; set; }
         public string team_name { get; set; }
         public string team_password { get; set; }
         public string team_tel { get; set; }
         public string logo_uri { get; set; }
-        public T_events events { get; set; }
 
         //  public string? belong { get; set; }
         public List<T_Player> role { get; set; } = new List<T_Player>();

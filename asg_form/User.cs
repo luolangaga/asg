@@ -1,6 +1,7 @@
 ﻿
 using System.ComponentModel;
 using asg_form.Controllers;
+using asg_form.Controllers.Team;
 using Microsoft.AspNetCore.Identity;
 
 namespace asg_form
@@ -14,6 +15,7 @@ namespace asg_form
         public DateTime CreationTime { get; set; }
 
         public form? haveform { get; set; }
+        public T_Team myteam { get; set; }
 
         public bool? isbooking { get; set; }
         public string? chinaname { get; set; }
