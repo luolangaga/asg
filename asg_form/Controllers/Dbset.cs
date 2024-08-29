@@ -204,7 +204,7 @@ namespace asg_form.Controllers
         public DbSet<StoreDB> T_Store { get; set; }
         public DbSet<StoreinfoDB> T_Storeinfo { get; set; }
         public DbSet<T_config> T_config { get; set; }
-
+        public DbSet<TaskDB> T_Task { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
