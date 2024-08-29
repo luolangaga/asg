@@ -14,7 +14,7 @@ namespace asg_form.Controllers
     public class TaskDB
     {
         public long id { get; set; }
-        public string userId { get; set; }
+        public long userId { get; set; }
         public string taskName { get; set; }
         public string taskDescription {  get; set; }
         public string status { get; set; }
@@ -22,7 +22,7 @@ namespace asg_form.Controllers
     }
     public class TaskCreate
     {
-        public string UserId { get; set; }
+        public long UserId { get; set; }
         public string TaskName { get; set; }
         public string TaskDescription { get; set; }
         public long Money { get; set; }
