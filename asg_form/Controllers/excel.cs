@@ -1,15 +1,9 @@
-
-﻿using asg_form;
-using Masuit.Tools.Files;
+using asg_form.Controllers.Team;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
-using Mirai.Net.Data.Shared;
 using OfficeOpenXml;
-using OfficeOpenXml.Packaging.Ionic.Zlib;
 using OfficeOpenXml.Style;
 using System.Drawing;
 using System.IO.Compression;
@@ -41,7 +35,7 @@ namespace asg_form.Controllers
 
 
 
-        public static void ExportToExcel_noadmin(List<form> data, string fileName)
+        public static void ExportToExcel_noadmin(List<T_Team> data, string fileName)
         {
             using (var package = new ExcelPackage())
             {
@@ -62,7 +56,7 @@ namespace asg_form.Controllers
                         worksheet.Cells[1, a].Style.Fill.BackgroundColor.SetColor(Color.RoyalBlue);
                         a++;
                     }
-                    var pic = worksheet.Drawings.AddPicture(form.team_name, $@"{AppDomain.CurrentDomain.BaseDirectory}loge\{form.events.name}\{form.team_name}.png");
+                    var pic = worksheet.Drawings.AddPicture(form.team_name, $@"{AppDomain.CurrentDomain.BaseDirectory}loge\{form.team_name}.png");
                     pic.SetSize(50, 50);
                     pic.SetPosition(26, 0);
                     worksheet.Cells[2, 2].Value = form.Id;
@@ -113,11 +107,11 @@ namespace asg_form.Controllers
 
 
 
-        public static void ExportToExcel(List<form> data, string fileName)
+        public static void ExportToExcel(List<T_Team> data, string fileName)
         {
             using (var package = new ExcelPackage())
             {
-               foreach(var form in data)
+                foreach (var form in data)
                 {
                     var worksheet = package.Workbook.Worksheets.Add(form.team_name);
                     worksheet.Cells[1, 1].Value = "队伍logo";
@@ -127,18 +121,18 @@ namespace asg_form.Controllers
                     worksheet.Cells[1, 5].Value = "队伍密码";
                     worksheet.Cells[1, 6].Value = "队伍票数";
 
-              
+
                     int a = 1;
-                    while (a<=6)
+                    while (a <= 6)
                     {
                         worksheet.Cells[1, a].Style.Font.Bold = true;
                         worksheet.Cells[1, a].Style.Font.Color.SetColor(Color.White);
-                        worksheet.Cells[1, a].Style.Fill.PatternType= ExcelFillStyle.Solid;
+                        worksheet.Cells[1, a].Style.Fill.PatternType = ExcelFillStyle.Solid;
                         worksheet.Cells[1, a].Style.Fill.BackgroundColor.SetColor(Color.RoyalBlue);
                         a++;
                     }
-                    var pic= worksheet.Drawings.AddPicture(form.team_name, $@"{AppDomain.CurrentDomain.BaseDirectory}loge\{form.events.name}\{form.team_name}.png");
-                   pic.SetSize(50,50);
+                    var pic = worksheet.Drawings.AddPicture(form.team_name, $@"{AppDomain.CurrentDomain.BaseDirectory}loge\{form.team_name}.png");
+                    pic.SetSize(50, 50);
                     pic.SetPosition(26, 0);
                     worksheet.Cells[2, 2].Value = form.Id;
                     worksheet.Cells[2, 3].Value = form.team_name;
@@ -198,7 +192,7 @@ namespace asg_form.Controllers
             {
                 TestDbContext ctx = new TestDbContext();
                 List<allteam> data = new List<allteam>();
-                List<form> teams = ctx.Forms.Include(a => a.role).Where(a => a.team_name.IndexOf(search)>=0).ToList();
+                List<form> teams = ctx.Forms.Include(a => a.role).Where(a => a.team_name.IndexOf(search) >= 0).ToList();
                 foreach (var team in teams)
                 {
                     var roles = team.role;
@@ -213,12 +207,12 @@ namespace asg_form.Controllers
                     data.Add(allteam);
                 }
                 return data;
-          }
+            }
             else
             {
                 return BadRequest(new error_mb { code = 400, message = "无权访问" });
             }
-    
+
 
         }
 
@@ -233,12 +227,12 @@ namespace asg_form.Controllers
 
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
-using(TestDbContext ctx =new TestDbContext())
+                using (TestDbContext ctx = new TestDbContext())
                 {
-                    object data = userManager.Users.Select(a => new {a.Id,a.UserName,a.chinaname,a.Email,a.officium}).Where(a => a.officium != null).GroupBy(a => a.officium).ToList();
+                    object data = userManager.Users.Select(a => new { a.Id, a.UserName, a.chinaname, a.Email, a.officium }).Where(a => a.officium != null).GroupBy(a => a.officium).ToList();
                     return data;
                 }
-                
+
             }
             else
             {
@@ -271,7 +265,7 @@ using(TestDbContext ctx =new TestDbContext())
                     post_User.officium = user1.officium;
                     post_User.chinaname = user1.chinaname;
 
-                post_User.Base64=user1.UserBase64;
+                    post_User.Base64 = user1.UserBase64;
                     post_User.Roles = (List<string>?)await userManager.GetRolesAsync(user1);
                     data.Add(post_User);
                 }
@@ -319,8 +313,8 @@ using(TestDbContext ctx =new TestDbContext())
         [HttpGet]
         public async Task<ActionResult<List<post_user>>> searchuser_bychinaname(string search)
         {
-           
-            if (this.User.FindAll(ClaimTypes.Role).Any(a=>a.Value=="admin"))
+
+            if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
                 TestDbContext ctx = new TestDbContext();
                 List<post_user> data = new List<post_user>();
@@ -354,13 +348,10 @@ using(TestDbContext ctx =new TestDbContext())
         {
             string guid = Guid.NewGuid().ToString();
             TestDbContext testDb = new TestDbContext();
-            List<form> result = testDb.Forms
-      .Include(a => a.role)
-      .Include(a => a.events)
-      .Where(e => e.events.name == event_name).ToList();
+            List<T_Team> result = testDb.Teams.ToList();
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "nbadmin"))
             {
- 
+
                 ExportToExcel(result, $"{AppDomain.CurrentDomain.BaseDirectory}excel/{guid}.xlsx");
                 return Ok(guid);
             }
@@ -371,7 +362,7 @@ using(TestDbContext ctx =new TestDbContext())
             }
             else
             {
-                return BadRequest(new error_mb { code=400,message="无管理员" });
+                return BadRequest(new error_mb { code = 400, message = "无管理员" });
             }
         }
 
@@ -386,7 +377,7 @@ using(TestDbContext ctx =new TestDbContext())
             {
                 DirectoryInfo di = new DirectoryInfo($@"{AppDomain.CurrentDomain.BaseDirectory}excel");
                 FileInfo[] files = di.GetFiles();
-                foreach(var file in files)
+                foreach (var file in files)
                 {
                     System.IO.File.Delete(file.FullName);
                 }
@@ -451,12 +442,12 @@ using(TestDbContext ctx =new TestDbContext())
         [ResponseCache(Duration = 30)]
         public async Task<ActionResult<string>> form_count()
         {
-            Dictionary<string,int> keys=new Dictionary<string,int>();
-          
-            using(TestDbContext ctx =new TestDbContext())
+            Dictionary<string, int> keys = new Dictionary<string, int>();
+
+            using (TestDbContext ctx = new TestDbContext())
             {
                 var all_event = await ctx.events.ToListAsync();
-                foreach(var eventt in all_event )
+                foreach (var eventt in all_event)
                 {
 
                     keys.Add(eventt.name, ctx.Forms.Where(a => a.events == eventt).Count());
@@ -486,13 +477,13 @@ using(TestDbContext ctx =new TestDbContext())
 
         }
 
-            /// <summary>
-            /// 获得所有战队信息
-            /// </summary>
-            /// <param name="page"></param>
-            /// <param name="page_long"></param>
-            /// <returns></returns>
-            [Authorize]
+        /// <summary>
+        /// 获得所有战队信息
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="page_long"></param>
+        /// <returns></returns>
+        [Authorize]
         [Route("api/v1/admin/form/all")]
         [HttpGet]
         public async Task<ActionResult<List<form>>> Post(string events)
@@ -503,16 +494,16 @@ using(TestDbContext ctx =new TestDbContext())
 
                 TestDbContext ctx = new TestDbContext();
 
-                var teams = ctx.Forms.Include(a => a.role).Include(a=>a.events).Where(a=>a.events.name==events).ToList();
-               foreach( var team in teams)
+                var teams = ctx.Forms.Include(a => a.role).Include(a => a.events).Where(a => a.events.name == events).ToList();
+                foreach (var team in teams)
                 {
                     team.events.forms = null;
-                   foreach(var role in team.role)
+                    foreach (var role in team.role)
                     {
                         role.form = null;
                     }
                 }
-            
+
                 return teams;
 
 
@@ -539,7 +530,7 @@ using(TestDbContext ctx =new TestDbContext())
 
 
 
-public class allteam
+        public class allteam
         {
             /// <summary>
             /// 战队id
@@ -557,6 +548,6 @@ public class allteam
 
 
 
-      
+
     }
 }

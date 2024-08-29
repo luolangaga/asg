@@ -625,8 +625,8 @@ else{
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
                 TestDbContext ctx = new TestDbContext();
-                var form = await ctx.Forms.Include(a => a.role).FirstOrDefaultAsync(a => a.Id == formid);
-                var users = await userManager.Users.Include(a => a.haveform).Where(a => a.haveform == form).ToListAsync();
+                var form = await ctx.Teams.Include(a => a.role).FirstOrDefaultAsync(a => a.Id == formid);
+                var users = await userManager.Users.Include(a => a.myteam).Where(a => a.myteam == form).ToListAsync();
                 try
                 {
                     foreach (var user in users)
@@ -639,7 +639,7 @@ else{
                 {
                 }
 
-                ctx.Forms.Remove(form); ;
+                ctx.Teams.Remove(form); ;
                 await ctx.SaveChangesAsync();
                 logger.Warn($"管理员删除了表单{formid},参赛选手：{string.Join(',', form.role.Select(a => a.role_name))}");
                 return Ok("删除成功！");
