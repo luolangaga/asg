@@ -14,6 +14,7 @@ namespace asg_form.Controllers
     public class TaskDB
     {
         public long id { get; set; }
+        public string chinaname { get; set; }
         public long userId { get; set; }
         public string taskName { get; set; }
         public string taskDescription {  get; set; }
@@ -22,6 +23,7 @@ namespace asg_form.Controllers
     }
     public class TaskCreate
     {
+        public string Chinaname { get; set; }
         public long UserId { get; set; }
         public string TaskName { get; set; }
         public string TaskDescription { get; set; }
@@ -50,6 +52,7 @@ namespace asg_form.Controllers
             {
                 var task = new TaskDB
                 {
+                    chinaname = taskinfo.Chinaname,
                     userId = taskinfo.UserId,
                     taskName = taskinfo.TaskName,
                     taskDescription = taskinfo.TaskDescription,
@@ -86,7 +89,7 @@ namespace asg_form.Controllers
         }
 
         [Route("api/v1/Task")]
-        [HttpGet]
+        [HttpPost]
         [Authorize]
         public async Task<ActionResult<object>> CekTask([FromBody] Click_done msg)
         {
@@ -103,7 +106,7 @@ namespace asg_form.Controllers
         }
 
         [Route("api/v1/admin/Task/Done")]
-        [HttpGet]
+        [HttpPost]
         [Authorize]
         public async Task<ActionResult<object>> FinishTask([FromBody] Click_done msg)
         {
@@ -116,7 +119,7 @@ namespace asg_form.Controllers
             using (TestDbContext sub = new TestDbContext())
             {
                 var task = sub.T_Task.Find(msg.id);
-                task.status = "1";
+                task.status = "2";
                 await sub.SaveChangesAsync();
                 return Ok(task);
             }
