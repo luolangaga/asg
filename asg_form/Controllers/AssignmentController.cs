@@ -84,7 +84,7 @@ namespace asg_form.Controllers
         }
 
         [Route("api/v1/Task")]
-        [HttpPost]
+        [HttpGet]
         [Authorize]
         public async Task<ActionResult<object>> CekTask([FromQuery] long userid)
         {
@@ -101,7 +101,7 @@ namespace asg_form.Controllers
         }
 
         [Route("api/v1/admin/Task/Done")]
-        [HttpPost]
+        [HttpGet]
         [Authorize]
         public async Task<ActionResult<object>> FinishTask([FromQuery] long userid)
         {
