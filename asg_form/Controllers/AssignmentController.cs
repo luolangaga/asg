@@ -84,7 +84,7 @@ namespace asg_form.Controllers
         }
         public class Click_done
         {
-            public string userId { get; set; }
+            public long userId { get; set; }
             public long id { get; set; }
         }
 
@@ -95,10 +95,14 @@ namespace asg_form.Controllers
         {
             string userId = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var user = await userManager.FindByIdAsync(userId);
-
+      
             using (TestDbContext sub = new TestDbContext())
             {
                 var task = sub.T_Task.Find(msg.id);
+                if(user.Id != task.userId)
+                {
+                    return Ok(new error_mb { code = 401, message = "不是自己的任务" });
+                }
                 task.status = "1";
                 await sub.SaveChangesAsync();
                 return Ok(task);
@@ -112,6 +116,7 @@ namespace asg_form.Controllers
         {
             string userId = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var user = await userManager.FindByIdAsync(userId);
+
             if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
                 return Ok(new error_mb { code = 401, message = "无权访问" });
@@ -120,9 +125,29 @@ namespace asg_form.Controllers
             {
                 var task = sub.T_Task.Find(msg.id);
                 task.status = "2";
+                user.Integral += task.money;
+                await userManager.UpdateAsync(user);
                 await sub.SaveChangesAsync();
                 return Ok(task);
             }
+        }
+
+        [Route("api/v1/Tasks")]
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<List<TaskDB>>> GetTasks([FromQuery] string userid = null)
+        {
+            TestDbContext test = new TestDbContext();
+
+            var query = test.T_Task.AsQueryable();
+
+            if (!string.IsNullOrEmpty(userid))
+            {
+                long idNum = long.Parse(userid);
+                query = query.Where(n => n.userId == idNum);
+            }
+
+            return query.OrderByDescending(a => a.userId).ToList();
         }
     }
 }
