@@ -69,7 +69,7 @@ namespace asg_form.Controllers
         [Route("api/v1/admin/Task")]
         [HttpDelete]
         [Authorize]
-        public async Task<ActionResult<object>> DelTask([FromQuery]long id)
+        public async Task<ActionResult<object>> DelTask([FromQuery] long id)
         {
             if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
@@ -82,27 +82,18 @@ namespace asg_form.Controllers
                 return Ok("ok");
             }
         }
-        public class Click_done
-        {
-            public long userId { get; set; }
-            public long id { get; set; }
-        }
 
         [Route("api/v1/Task")]
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<object>> CekTask([FromBody] Click_done msg)
+        public async Task<ActionResult<object>> CekTask([FromQuery] long userid)
         {
             string userId = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var user = await userManager.FindByIdAsync(userId);
       
             using (TestDbContext sub = new TestDbContext())
             {
-                var task = sub.T_Task.Find(msg.id);
-                if(user.Id != task.userId)
-                {
-                    return Ok(new error_mb { code = 401, message = "不是自己的任务" });
-                }
+                var task = sub.T_Task.Find(userid);
                 task.status = "1";
                 await sub.SaveChangesAsync();
                 return Ok(task);
@@ -112,7 +103,7 @@ namespace asg_form.Controllers
         [Route("api/v1/admin/Task/Done")]
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<object>> FinishTask([FromBody] Click_done msg)
+        public async Task<ActionResult<object>> FinishTask([FromQuery] long userid)
         {
             string userId = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var user = await userManager.FindByIdAsync(userId);
@@ -123,7 +114,7 @@ namespace asg_form.Controllers
             }
             using (TestDbContext sub = new TestDbContext())
             {
-                var task = sub.T_Task.Find(msg.id);
+                var task = sub.T_Task.Find(userid);
                 task.status = "2";
                 user.Integral += task.money;
                 await userManager.UpdateAsync(user);
