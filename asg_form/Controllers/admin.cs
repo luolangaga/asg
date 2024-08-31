@@ -460,25 +460,28 @@ else{
         }
 
 
-
+        public class setoffium
+        {
+            public string userid { get; set; }
+            public string officium {  get; set; }
+        }
         /// <summary>
         /// 设置职位,需要superadmin
         /// </summary>
-        /// <param name="userid">用户id</param>
-        /// <param name="officium">职位名称</param>
+        /// <param name="stof"></param>
         /// <returns></returns>
         [Route("api/v1/admin/officium")]
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<string>> setofficium(string userid, string officium)
+        public async Task<ActionResult<string>> setofficium([FromBody]setoffium stof )
         {
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
-                var ouser = await userManager.FindByIdAsync(userid);
+                var ouser = await userManager.FindByIdAsync(stof.userid);
 
-                ouser.officium = officium;
+                ouser.officium = stof.officium;
                 await userManager.UpdateAsync(ouser);
-                logger.Warn($"设置了{ouser.UserName}的职位为{officium}");
+                logger.Warn($"设置了{ouser.UserName}的职位为{stof.officium}");
                 SendEmail(ouser.Email, "ASG赛事组", $@"<div>
     <includetail>
         <table style=""font-family: Segoe UI, SegoeUIWF, Arial, sans-serif; font-size: 12px; color: #333333; border-spacing: 0px; border-collapse: collapse; padding: 0px; width: 580px; direction: ltr"">
@@ -512,7 +515,7 @@ else{
                         <tbody>
                         <tr>
                             <td style=""font-size: 12px; padding: 0px 0px 5px 0px"">
-                               你的职位已经被设置为{officium}。
+                               你的职位已经被设置为{stof.officium}。
                                 <ul style=""font-size: 14px"">
                                     <li style=""padding-top: 10px"">
                                         对此次执行有疑问请联系我们的QQ：2667210109。
