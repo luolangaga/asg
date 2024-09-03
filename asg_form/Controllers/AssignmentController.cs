@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using NPOI.HPSF;
 using System.Security.Claims;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Web;
 
 namespace asg_form.Controllers
 {
@@ -98,9 +100,9 @@ namespace asg_form.Controllers
         }
 
         [Route("api/v1/admin/Task/Done")]
-        [HttpGet]
+        [HttpPost]
         [Authorize]
-        public async Task<ActionResult<object>> FinishTask([FromQuery] long taskid)
+        public async Task<ActionResult<object>> FinishTask([FromBody] long taskid,string st)
         {
             string userId = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var user = await userManager.FindByIdAsync(userId);
@@ -112,8 +114,16 @@ namespace asg_form.Controllers
             using (TestDbContext sub = new TestDbContext())
             {
                 var task = sub.T_Task.Find(taskid);
-                task.status = "2";
-                user.Integral += task.money;
+                long isPassed = long.Parse(task.status);
+                if(isPassed == 2)
+                {
+                    task.status = "2";
+                    user.Integral += task.money;
+                }
+                if (isPassed == 3)
+                {
+                    task.status = "3";
+                }
                 await userManager.UpdateAsync(user);
                 await sub.SaveChangesAsync();
                 return Ok(task);
@@ -135,15 +145,17 @@ namespace asg_form.Controllers
                 query = query.Where(n => n.userId == idNum);
             }
 
-            return Ok("用户不存在");
-            //return query.OrderByDescending(a => a.userId).ToList();
+            //return Ok("用户不存在");
+            return query.OrderByDescending(a => a.userId).ToList();
         }
 
         [Route("api/v1/admin/FindTasks")]
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<object>> FindTasks([FromQuery] string chinaname = null)
-        {          
+        public async Task<ActionResult<object>> FindTasks([FromQuery] string chinaname = null,string st = null)
+        {
+            string encodedChinaname = HttpUtility.UrlEncode(chinaname);
+
             if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
                 return Ok(new error_mb { code = 401, message = "无权访问" });
@@ -153,8 +165,13 @@ namespace asg_form.Controllers
                 var query = sub.T_Task.AsQueryable();
 
                 if (!string.IsNullOrEmpty(chinaname))
-                {                    
-                    query = query.Where(n => n.chinaname == chinaname);
+                {
+                    query = query.Where(n => n.chinaname.Contains(encodedChinaname));
+                }
+
+                if (!string.IsNullOrEmpty(st))
+                {
+                    query = query.Where(n => n.status == st);
                 }
 
                 return query.OrderByDescending(a => a.chinaname).ToList();

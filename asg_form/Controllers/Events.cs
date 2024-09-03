@@ -105,11 +105,11 @@ namespace asg_form.Controllers
                 var evernt = test.events.FirstOrDefault(a => a.name == event_name);
                 test.Remove(evernt);
                 await test.SaveChangesAsync();
-                return Ok("删掉了呢");
+                return Ok("删除");
             }
             else
             {
-                return BadRequest(new error_mb { code = 400, message = "没P管理员隔着装尼玛呢" });
+                return BadRequest(new error_mb { code = 400, message = "不是管理员" });
             }
 
         }
