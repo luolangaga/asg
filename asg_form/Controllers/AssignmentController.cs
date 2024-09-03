@@ -10,6 +10,7 @@ using NPOI.HPSF;
 using System.Security.Claims;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using System.Web;
+using System.Net.NetworkInformation;
 
 namespace asg_form.Controllers
 {
@@ -152,9 +153,9 @@ namespace asg_form.Controllers
         [Route("api/v1/admin/FindTasks")]
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<object>> FindTasks([FromQuery] string chinaname = null,string st = null)
+        public async Task<ActionResult<object>> FindTasks([FromQuery] string chinaname = null,string status = null)
         {
-            string encodedChinaname = HttpUtility.UrlEncode(chinaname);
+            //string encodedChinaname = HttpUtility.UrlEncode(chinaname);
 
             if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
@@ -166,15 +167,15 @@ namespace asg_form.Controllers
 
                 if (!string.IsNullOrEmpty(chinaname))
                 {
-                    query = query.Where(n => n.chinaname.Contains(encodedChinaname));
+                    query = query.Where(n => n.chinaname.Contains(chinaname));
                 }
 
-                if (!string.IsNullOrEmpty(st))
+                if (!string.IsNullOrEmpty(status))
                 {
-                    query = query.Where(n => n.status == st);
+                    query = query.Where(n => n.status == status);
                 }
 
-                return query.OrderByDescending(a => a.chinaname).ToList();
+                return query.OrderByDescending(a => a.status).ToList();
             }
         }
     }
