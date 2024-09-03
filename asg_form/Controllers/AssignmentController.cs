@@ -11,6 +11,7 @@ using System.Security.Claims;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using System.Web;
 using System.Net.NetworkInformation;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace asg_form.Controllers
 {
@@ -99,11 +100,16 @@ namespace asg_form.Controllers
                 return Ok(task);
             }
         }
+        public class statusChange
+        {
+            public long taskid {  get; set; }
+            public string status { get; set; }
 
+        }
         [Route("api/v1/admin/Task/Done")]
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<object>> FinishTask([FromBody] long taskid,string st)
+        public async Task<ActionResult<object>> FinishTask([FromBody] statusChange msg)
         {
             string userId = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var user = await userManager.FindByIdAsync(userId);
@@ -114,8 +120,8 @@ namespace asg_form.Controllers
             }
             using (TestDbContext sub = new TestDbContext())
             {
-                var task = sub.T_Task.Find(taskid);
-                long isPassed = long.Parse(st);
+                var task = sub.T_Task.Find(msg.taskid);
+                long isPassed = long.Parse(msg.status);
                 if(isPassed == 2)
                 {
                     task.status = "2";
