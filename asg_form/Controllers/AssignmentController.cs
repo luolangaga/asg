@@ -115,7 +115,7 @@ namespace asg_form.Controllers
             using (TestDbContext sub = new TestDbContext())
             {
                 var task = sub.T_Task.Find(taskid);
-                long isPassed = long.Parse(task.status);
+                long isPassed = long.Parse(st);
                 if(isPassed == 2)
                 {
                     task.status = "2";
