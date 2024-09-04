@@ -48,7 +48,7 @@ namespace asg_form.Controllers
         [Authorize]
         public async Task<ActionResult<string>> PubTask([FromBody] TaskCreate taskinfo)
         {
-            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
+            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "nbadmin"))
             {
                 return Ok(new error_mb { code = 401, message = "无权访问" });
             }
@@ -75,7 +75,7 @@ namespace asg_form.Controllers
         [Authorize]
         public async Task<ActionResult<object>> DelTask([FromQuery] long id)
         {
-            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
+            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "nbadmin"))
             {
                 return Ok(new error_mb { code = 401, message = "无权访问" });
             }
