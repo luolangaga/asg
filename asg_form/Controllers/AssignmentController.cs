@@ -114,7 +114,7 @@ namespace asg_form.Controllers
             string userId = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var user = await userManager.FindByIdAsync(userId);
 
-            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
+            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "nadmin"))
             {
                 return Ok(new error_mb { code = 401, message = "无权访问" });
             }
@@ -126,6 +126,7 @@ namespace asg_form.Controllers
                 {
                     task.status = "2";
                     user.Integral += task.money;
+                    user.Integral = user.Integral > 200 ? 200 : user.Integral;
                 }
                 if (isPassed == 3)
                 {
@@ -163,7 +164,7 @@ namespace asg_form.Controllers
         {
             //string encodedChinaname = HttpUtility.UrlEncode(chinaname);
 
-            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
+            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "nadmin"))
             {
                 return Ok(new error_mb { code = 401, message = "无权访问" });
             }
