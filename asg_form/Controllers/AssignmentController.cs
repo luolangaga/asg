@@ -114,7 +114,7 @@ namespace asg_form.Controllers
             string userId = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var user = await userManager.FindByIdAsync(userId);
 
-            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "nadmin"))
+            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "nbadmin"))
             {
                 return Ok(new error_mb { code = 401, message = "无权访问" });
             }
@@ -164,7 +164,7 @@ namespace asg_form.Controllers
         {
             //string encodedChinaname = HttpUtility.UrlEncode(chinaname);
 
-            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "nadmin"))
+            if (!this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "nbadmin"))
             {
                 return Ok(new error_mb { code = 401, message = "无权访问" });
             }
