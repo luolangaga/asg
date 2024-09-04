@@ -65,8 +65,9 @@ namespace asg_form.Controllers
                 };
                 sub.T_Task.Add(task);
                 await sub.SaveChangesAsync();
-                return Ok(taskinfo);
+                return Ok(new error_mb { code = 200, message = "新建任务成功" });
             }
+
         }
 
 
@@ -83,7 +84,7 @@ namespace asg_form.Controllers
             {
                 sub.T_Task.Remove(sub.T_Task.Find(id));
                 await sub.SaveChangesAsync();
-                return Ok("ok");
+                return Ok(new error_mb { code = 200, message = "成功删除" });
             }
         }
 
@@ -97,7 +98,7 @@ namespace asg_form.Controllers
                 var task = sub.T_Task.Find(taskid);
                 task.status = "1";
                 await sub.SaveChangesAsync();
-                return Ok(task);
+                return Ok(new error_mb { code = 200, message = "成功提交修改" });
             }
         }
         public class statusChange
@@ -134,7 +135,7 @@ namespace asg_form.Controllers
                 }
                 await userManager.UpdateAsync(user);
                 await sub.SaveChangesAsync();
-                return Ok(task);
+                return Ok(new error_mb { code = 200, message = "成功修改" });
             }
         }
 
@@ -160,7 +161,7 @@ namespace asg_form.Controllers
         [Route("api/v1/admin/FindTasks")]
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<object>> FindTasks([FromQuery] string chinaname = null,string status = null)
+        public async Task<ActionResult<object>> FindTasks([FromQuery] string chinaname = null,string status = null,long page = 1,long limit = 10)
         {
             //string encodedChinaname = HttpUtility.UrlEncode(chinaname);
 
