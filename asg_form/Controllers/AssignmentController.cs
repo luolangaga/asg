@@ -12,6 +12,8 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using System.Web;
 using System.Net.NetworkInformation;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+using NPOI.SS.Formula.Functions;
+using Microsoft.EntityFrameworkCore;
 
 namespace asg_form.Controllers
 {
@@ -43,6 +45,7 @@ namespace asg_form.Controllers
             this.roleManager = roleManager;
             this.userManager = userManager;
         }
+
         [Route("api/v1/admin/Task")]
         [HttpPost]
         [Authorize]
@@ -161,7 +164,7 @@ namespace asg_form.Controllers
         [Route("api/v1/admin/FindTasks")]
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<object>> FindTasks([FromQuery] string chinaname = null,string status = null,long page = 1,long limit = 10)
+        public async Task<ActionResult<object>> FindTasks([FromQuery] string chinaname = null,string status = null,short page = 1,short limit = 10)
         {
             //string encodedChinaname = HttpUtility.UrlEncode(chinaname);
 
@@ -171,6 +174,8 @@ namespace asg_form.Controllers
             }
             using (TestDbContext sub = new TestDbContext())
             {
+                //List <TaskDB> taskDBs = new List<TaskDB>();
+
                 var query = sub.T_Task.AsQueryable();
 
                 if (!string.IsNullOrEmpty(chinaname))
@@ -183,8 +188,41 @@ namespace asg_form.Controllers
                     query = query.Where(n => n.status == status);
                 }
 
-                return query.OrderByDescending(a => a.status).ToList();
+                var totalRecords = await query.CountAsync();
+
+                var tasks = await query
+                    .OrderByDescending(a => a.status)
+                    .Skip((page - 1) * limit)
+                    .Take(limit)
+                    .ToListAsync();
+
+                var result = new
+                {
+                    TotalRecords = totalRecords,
+                    Page = page,
+                    Limit = limit,
+                    Tasks = tasks
+                };
+
+                return Ok(result);
             }
         }
+
+        [Route("api/v1/Find_nbadmin")]
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<List<User>>> Find_nbadmin()
+        {
+            using (TestDbContext fd = new TestDbContext())
+            {
+                var usersWithNbadminRole = fd.
+                    .Where(u => u..Any(r => r.RoleName == "nbadmin"))
+                    .ToList();
+
+                return Ok(usersWithNbadminRole);
+                //return Ok(new error_mb { code = 200, message = "所有超级管理员" });
+            }
+        }
+
     }
 }
