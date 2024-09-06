@@ -26,6 +26,8 @@ namespace asg_form.Controllers
         public string taskDescription {  get; set; }
         public string status { get; set; }
         public long money { get; set; }
+
+        public DateTime create_time { get; set; }
     }
     public class TaskCreate
     {
@@ -65,6 +67,7 @@ namespace asg_form.Controllers
                     taskDescription = taskinfo.TaskDescription,
                     money = taskinfo.Money,
                     status = "0",
+                    create_time = DateTime.Now
                 };
                 sub.T_Task.Add(task);
                 await sub.SaveChangesAsync();
@@ -214,13 +217,12 @@ namespace asg_form.Controllers
         public async Task<ActionResult<List<User>>> Find_nbadmin()
         {
             using (TestDbContext fd = new TestDbContext())
-            {
-                var usersWithNbadminRole = fd.
-                    .Where(u => u..Any(r => r.RoleName == "nbadmin"))
-                    .ToList();
+            {              
+                var usersWithNbadminRole = this.User.FindAll(ClaimTypes.Role)
+                             .Where(a => a.Value == "nbadmin")
+                             .ToList();
 
                 return Ok(usersWithNbadminRole);
-                //return Ok(new error_mb { code = 200, message = "所有超级管理员" });
             }
         }
 
