@@ -27,7 +27,7 @@ namespace asg_form.Controllers
         public string status { get; set; }
         public long money { get; set; }
 
-        public DateTime create_time { get; set; }
+       // public DateTime create_time { get; set; }
     }
     public class TaskCreate
     {
@@ -36,6 +36,7 @@ namespace asg_form.Controllers
         public string TaskName { get; set; }
         public string TaskDescription { get; set; }
         public long Money { get; set; }
+
     }
     public class AssignmentController : ControllerBase
     {
@@ -67,7 +68,7 @@ namespace asg_form.Controllers
                     taskDescription = taskinfo.TaskDescription,
                     money = taskinfo.Money,
                     status = "0",
-                    create_time = DateTime.Now
+                    //create_time = DateTime.Now
                 };
                 sub.T_Task.Add(task);
                 await sub.SaveChangesAsync();
