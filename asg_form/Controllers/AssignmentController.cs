@@ -27,7 +27,9 @@ namespace asg_form.Controllers
         public string status { get; set; }
         public long money { get; set; }
 
-        public string last_operate_time { get; set; }
+        public string createTime { get; set; }
+        
+        public string lastOperateTime { get; set; }
     }
     public class TaskCreate
     {
@@ -69,7 +71,7 @@ namespace asg_form.Controllers
                     taskDescription = taskinfo.TaskDescription,
                     money = taskinfo.Money,
                     status = "0",
-                    last_operate_time = dateString.ToString()
+                    lastOperateTime = dateString.ToString()
                 };
                 sub.T_Task.Add(task);
                 await sub.SaveChangesAsync();
@@ -106,7 +108,8 @@ namespace asg_form.Controllers
                 var task = sub.T_Task.Find(taskid);
                 var dateString = DateTime.Now;
                 task.status = "1";
-                task.last_operate_time = dateString.ToString();
+                task.createTime = dateString.ToString();
+                task.lastOperateTime = dateString.ToString();
                 await sub.SaveChangesAsync();
                 return Ok(new error_mb { code = 200, message = "成功提交修改" });
             }
@@ -144,7 +147,7 @@ namespace asg_form.Controllers
                 {
                     task.status = "3";
                 }
-                task.last_operate_time = dateString.ToString();
+                task.lastOperateTime = dateString.ToString();
                 await userManager.UpdateAsync(user);
                 await sub.SaveChangesAsync();
                 return Ok(new error_mb { code = 200, message = "成功修改" });
@@ -206,12 +209,11 @@ namespace asg_form.Controllers
                     .ToListAsync();
 
                 var result = new
-                {                    
+                {
                     rows = Tasks ,
-                    total = TotalRecords
+                    total = TotalRecords,
                 };
-
-                return (result,new code_st { message = null ,status = 200});
+                return Ok(result);
             }
         }
 
