@@ -71,6 +71,7 @@ namespace asg_form.Controllers
                     taskDescription = taskinfo.TaskDescription,
                     money = taskinfo.Money,
                     status = "0",
+                    createTime = dateString.ToString(),
                     lastOperateTime = dateString.ToString()
                 };
                 sub.T_Task.Add(task);
@@ -108,7 +109,6 @@ namespace asg_form.Controllers
                 var task = sub.T_Task.Find(taskid);
                 var dateString = DateTime.Now;
                 task.status = "1";
-                task.createTime = dateString.ToString();
                 task.lastOperateTime = dateString.ToString();
                 await sub.SaveChangesAsync();
                 return Ok(new error_mb { code = 200, message = "成功提交修改" });
