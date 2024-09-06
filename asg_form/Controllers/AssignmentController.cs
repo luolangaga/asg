@@ -197,21 +197,21 @@ namespace asg_form.Controllers
                     query = query.Where(n => n.status == status);
                 }
 
-                var total = await query.CountAsync();
+                var TotalRecords = await query.CountAsync();
 
-                var rows = await query
+                var Tasks = await query
                     .OrderByDescending(a => a.status)
                     .Skip((page - 1) * limit)
                     .Take(limit)
                     .ToListAsync();
 
                 var result = new
-                {
-                    TotalRecords = total,
-                    Tasks = rows
+                {                    
+                    rows = Tasks ,
+                    total = TotalRecords
                 };
 
-                return Ok(result);
+                return (result,new code_st { message = null ,status = 200});
             }
         }
 

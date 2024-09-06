@@ -41,7 +41,13 @@ public class MyExceptionFilter : IAsyncExceptionFilter
 
 
 
+public class code_st
+{
+    
+    public string message { get; set; }
 
+    public int status { get; set; }
+}
 
 public class error_mb
 {
