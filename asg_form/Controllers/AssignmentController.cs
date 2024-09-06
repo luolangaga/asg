@@ -27,7 +27,7 @@ namespace asg_form.Controllers
         public string status { get; set; }
         public long money { get; set; }
 
-       // public DateTime create_time { get; set; }
+        public string last_operate_time { get; set; }
     }
     public class TaskCreate
     {
@@ -58,6 +58,7 @@ namespace asg_form.Controllers
             {
                 return Ok(new error_mb { code = 401, message = "无权访问" });
             }
+            var dateString = DateTime.Now;
             using (TestDbContext sub = new TestDbContext())
             {
                 var task = new TaskDB
@@ -68,7 +69,7 @@ namespace asg_form.Controllers
                     taskDescription = taskinfo.TaskDescription,
                     money = taskinfo.Money,
                     status = "0",
-                    //create_time = DateTime.Now
+                    last_operate_time = dateString.ToString()
                 };
                 sub.T_Task.Add(task);
                 await sub.SaveChangesAsync();
@@ -103,7 +104,9 @@ namespace asg_form.Controllers
             using (TestDbContext sub = new TestDbContext())
             {
                 var task = sub.T_Task.Find(taskid);
+                var dateString = DateTime.Now;
                 task.status = "1";
+                task.last_operate_time = dateString.ToString();
                 await sub.SaveChangesAsync();
                 return Ok(new error_mb { code = 200, message = "成功提交修改" });
             }
@@ -126,6 +129,7 @@ namespace asg_form.Controllers
             {
                 return Ok(new error_mb { code = 401, message = "无权访问" });
             }
+            var dateString = DateTime.Now;
             using (TestDbContext sub = new TestDbContext())
             {
                 var task = sub.T_Task.Find(msg.taskid);
@@ -140,6 +144,7 @@ namespace asg_form.Controllers
                 {
                     task.status = "3";
                 }
+                task.last_operate_time = dateString.ToString();
                 await userManager.UpdateAsync(user);
                 await sub.SaveChangesAsync();
                 return Ok(new error_mb { code = 200, message = "成功修改" });
@@ -192,9 +197,9 @@ namespace asg_form.Controllers
                     query = query.Where(n => n.status == status);
                 }
 
-                var totalRecords = await query.CountAsync();
+                var total = await query.CountAsync();
 
-                var tasks = await query
+                var rows = await query
                     .OrderByDescending(a => a.status)
                     .Skip((page - 1) * limit)
                     .Take(limit)
@@ -202,10 +207,8 @@ namespace asg_form.Controllers
 
                 var result = new
                 {
-                    TotalRecords = totalRecords,
-                    Page = page,
-                    Limit = limit,
-                    Tasks = tasks
+                    TotalRecords = total,
+                    Tasks = rows
                 };
 
                 return Ok(result);
