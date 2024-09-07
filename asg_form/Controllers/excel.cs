@@ -225,20 +225,13 @@ namespace asg_form.Controllers
         public async Task<ActionResult<object>> Gethaveop()
         {
 
-            if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
-            {
                 using (TestDbContext ctx = new TestDbContext())
                 {
                     object data = userManager.Users.Select(a => new { a.Id, a.UserName, a.chinaname, a.Email, a.officium }).Where(a => a.officium != null).GroupBy(a => a.officium).ToList();
                     return data;
                 }
 
-            }
-            else
-            {
-                return BadRequest(new error_mb { code = 400, message = "无权访问" });
-            }
-
+            
 
         }
 
