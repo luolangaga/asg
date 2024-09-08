@@ -32,6 +32,8 @@ namespace asg_form.Controllers
         public string createTime { get; set; }
         
         public string lastOperateTime { get; set; }
+
+        public string approvalPerson { get; set; } = "未审核";
     }
     public class TaskCreate
     {
@@ -154,6 +156,7 @@ namespace asg_form.Controllers
                     task.status = "3";
                 }
                 task.lastOperateTime = dateString.ToString();
+                task.approvalPerson = user.chinaname;
                 await userManager.UpdateAsync(user);
                 await sub.SaveChangesAsync();
                 var result = new
