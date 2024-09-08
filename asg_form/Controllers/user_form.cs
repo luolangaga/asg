@@ -108,22 +108,21 @@ namespace asg_form.Controllers
         [Authorize]
         [Route("api/v1/user/form")]
         [HttpGet]
-        public async Task<ActionResult<form>> getmyform()
+        public async Task<ActionResult<object>> getmyform()
         {
 
             string id = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-            var ouser =  userManager.Users.Include(a=>a.haveform.role).Include(a=>a.haveform.events).FirstOrDefault(a => a.Id == id.ToInt64());
-            if (ouser.haveform == null)
+            var ouser =  userManager.Users.Include(a=>a.myteam.role).FirstOrDefault(a => a.Id == id.ToInt64());
+            if (ouser.myteam == null)
             {
                 return BadRequest(new error_mb { code = 400, message = "你没有绑定表单" });
 
             }
-            ouser.haveform.events.forms = null;
-            foreach (var role in ouser.haveform.role)
+             foreach (var role in ouser.myteam.role)
             {
-                role.form = null;
+                role.Team = null;
             }
-                return ouser.haveform;
+                return Ok(ouser.myteam);
 
 
 
