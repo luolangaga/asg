@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace asg_form.Controllers
 {
@@ -27,18 +28,19 @@ namespace asg_form.Controllers
         public async Task<ActionResult<string>> getschedle_c([FromBody]req_com_form req)
         {
             int id = this.User.FindFirst(ClaimTypes.NameIdentifier)!.Value.ToInt32();
-          //  var user = await userManager.Users.FirstAsync(a=>a.Id==id);
-
+            //  var user = await userManager.Users.FirstAsync(a=>a.Id==id);
+            var dateString = DateTime.Now;
             TestDbContext testDb = new TestDbContext();
             var result = new com_form
             {
-                Com_Email = req.Com_Email,
+                comSex = req.sex,
                 Com_Cocial_media = req.Com_Cocial_media,
                 Com_qq = req.Com_qq,
                 UserId=id,
                 Status = 0,
                 introduction = req.introduction,
-                idv_id=req.idv_id
+                idv_id=req.idv_id,
+                createTime = dateString.ToString(),
             };
         
            testDb.com_Forms.Add(result);
@@ -48,23 +50,32 @@ namespace asg_form.Controllers
         [Route("api/v1/admin/comform")]
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<string>> getschedle_c(short page, short page_long = 10)
+        public async Task<ActionResult<string>> getschedle_c(short page, short limit)
         {
             if (this.User.FindAll(ClaimTypes.Role).Any(a => a.Value == "admin"))
             {
-                int a = userManager.Users.Count();
-                int b = page_long * page;
-                if (page_long * page > a)
+                using (TestDbContext sub = new TestDbContext())
                 {
-                    b = a;
+                    var query = sub.com_Forms.AsQueryable();
+
+                    var TotalRecords = await query.CountAsync();
+
+                    var signData = await query
+                    .OrderByDescending(a => a.Status)
+                    .Skip((page - 1) * limit)
+                    .Take(limit)
+                    .ToListAsync();
+
+                    var result = new
+                    {
+                        rows = signData,
+                        total = TotalRecords,
+                    };
+                return Ok(result);
                 }
-               
-                TestDbContext testDb = new TestDbContext();
-               
- var comform = testDb.com_Forms.Skip(page_long * page - page_long).Take(page_long).Select(a => new {a.Id,a.idv_id,a.Status,a.introduction,a.Com_Cocial_media,a.Com_Email,a.Com_qq,a.UserId}).ToList();
-                return Newtonsoft.Json.JsonConvert.SerializeObject(comform);
+                
             }
-            return BadRequest(new error_mb { code = 400, message = "没有管理员，无法获取" });
+            return Ok(new error_mb { code = 400, message = "没有管理员，无法获取" });
         }
         [Route("api/v1/admin/user")]
         [HttpGet]
@@ -183,7 +194,7 @@ namespace asg_form.Controllers
         public class req_com_form
         {
           
-            public string Com_Email { get; set; }
+            public string sex { get; set; }
             public string? Com_Cocial_media { get; set; }
             public string idv_id { get; set; }
             public string introduction { get; set; }
@@ -194,13 +205,14 @@ namespace asg_form.Controllers
         {
             public long Id { get; set; }
             public int UserId { get; set; }
-            public string Com_Email { get; set; }
+            public string comSex { get; set; }
             public string? Com_Cocial_media { get; set; }
             public string idv_id { get; set; }
             public string introduction { get; set; }
             public string Com_qq { get; set; }
             public int Status { get; set; }
 
+            public string createTime { get; set; }
         }
     }
      
