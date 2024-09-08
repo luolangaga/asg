@@ -37,7 +37,7 @@ namespace asg_form.Controllers
                 Com_Cocial_media = req.Com_Cocial_media,
                 Com_qq = req.Com_qq,
                 UserId=id,
-                Status = 0,
+                Status = "0",
                 introduction = req.introduction,
                 idv_id=req.idv_id,
                 createTime = dateString.ToString(),
@@ -99,7 +99,7 @@ namespace asg_form.Controllers
                 TestDbContext testDb = new TestDbContext();
 
                 var comform = await testDb.com_Forms.FirstAsync(a=>a.Id == comform_id);
-                comform.Status = 1;
+                comform.Status = "1";
                await testDb.SaveChangesAsync();
                 var ouser = await userManager.FindByIdAsync(comform.UserId.ToString());
                 ouser.officium = "Commentator";
@@ -182,7 +182,7 @@ namespace asg_form.Controllers
                 TestDbContext testDb = new TestDbContext();
 
                 var comform = await testDb.com_Forms.FirstAsync(a => a.Id == comform_id);
-                comform.Status = 2;
+                comform.Status ="2";
                 var ouser =await userManager.FindByIdAsync(comform.UserId.ToString());
                await testDb.SaveChangesAsync();
                 admin.SendEmail(ouser.Email, "ASG赛事组", $@"很抱歉，你的解说申请未通过");
@@ -210,7 +210,7 @@ namespace asg_form.Controllers
             public string idv_id { get; set; }
             public string introduction { get; set; }
             public string Com_qq { get; set; }
-            public int Status { get; set; }
+            public string Status { get; set; }
 
             public string createTime { get; set; }
         }

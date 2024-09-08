@@ -33,7 +33,7 @@ namespace asg_form.Controllers
         
         public string lastOperateTime { get; set; }
 
-        public string approvalPerson { get; set; } = "未审核";
+        public string approvalPerson { get; set; } 
     }
     public class TaskCreate
     {
@@ -80,7 +80,8 @@ namespace asg_form.Controllers
                     money = taskinfo.Money,
                     status = "0",
                     createTime = dateString.ToString(),
-                    lastOperateTime = dateString.ToString()
+                    lastOperateTime = dateString.ToString(),
+                    approvalPerson = "未审核"
                 };
                 sub.T_Task.Add(task);
                 await sub.SaveChangesAsync();
@@ -163,7 +164,7 @@ namespace asg_form.Controllers
                 {
                     approvalPerson = user.chinaname,
                     status = task.status,
-                    taskid = msg.taskid,
+                    taskId = msg.taskid,
                     code = 200,
                     message = "成功修改" 
                 };
