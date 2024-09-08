@@ -21,7 +21,7 @@ namespace asg_form.Controllers
                 builder.Property(e => e.Id).IsRequired();
                 builder.Property(a => a.introduction).IsRequired();
                 builder.Property(a => a.Com_Cocial_media).IsRequired();
-                builder.Property(a => a.Com_Email).IsRequired();
+                builder.Property(a => a.comSex).IsRequired();
                 builder.Property(a => a.UserId);
                 builder.Property(a => a.idv_id).IsRequired();
                 builder.Property(a => a.Com_qq).IsRequired();
