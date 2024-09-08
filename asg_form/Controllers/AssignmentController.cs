@@ -22,7 +22,7 @@ namespace asg_form.Controllers
         public long id { get; set; }
         public string chinaname { get; set; }
         public string createPerson { get; set; }
-        public string createUserid { get; set; }
+        public long createUserId { get; set; }
         public long userId { get; set; }
         public string taskName { get; set; }
         public string taskDescription {  get; set; }
@@ -39,7 +39,7 @@ namespace asg_form.Controllers
     {
         public string Chinaname { get; set; }
         public string CreatePerson { get; set; }
-        public string CreateUserid { get; set; }
+        public long CreateUserid { get; set; }
         public long UserId { get; set; }
         public string TaskName { get; set; }
         public string TaskDescription { get; set; }
@@ -73,7 +73,7 @@ namespace asg_form.Controllers
                 {
                     chinaname = taskinfo.Chinaname,
                     createPerson = taskinfo.CreatePerson,
-                    createUserid = taskinfo.CreateUserid,
+                    createUserId = taskinfo.CreateUserid,
                     userId = taskinfo.UserId,
                     taskName = taskinfo.TaskName,
                     taskDescription = taskinfo.TaskDescription,
