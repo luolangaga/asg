@@ -1,6 +1,7 @@
 ﻿
 using asg_form.Controllers.Store;
 using asg_form.Controllers.Team;
+using asg_form.Controllers.Teamregistration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.DataEncryption;
@@ -237,7 +238,7 @@ namespace asg_form.Controllers
         public DbSet<StoreinfoDB> T_Storeinfo { get; set; }
         public DbSet<T_config> T_config { get; set; }
         public DbSet<TaskDB> T_Task { get; set; }
-
+        public DbSet<ComformDB> T_Comform { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             string connStr = @"Server=localhost\SQLEXPRESS;Database=master;Trusted_Connection=True;TrustServerCertificate=true";
