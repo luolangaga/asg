@@ -22,6 +22,7 @@ namespace asg_form.Controllers.Teamregistration
 {
     public class ComformDB
     {
+        public long id { get; set; }
         public string chinaname { get; set; }
         public int user_id { get; set; }
         public int sex { get; set; }
@@ -187,6 +188,8 @@ namespace asg_form.Controllers.Teamregistration
 
                 var result = new
                 {
+                    code= 200,
+                    message="",
                     rows = Tasks,
                     total = TotalRecords,
                 };
