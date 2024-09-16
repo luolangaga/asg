@@ -99,7 +99,7 @@ namespace asg_form.Controllers.Team
                     if (imageFile == null || imageFile.Length == 0)
                         return BadRequest("Invalid image file.");
                     // 将文件保存到磁盘
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), $"loge/", $"{imageFile.FileName}");
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), $"loge/", $"{for1.team_name}.png");
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await imageFile.CopyToAsync(stream);
